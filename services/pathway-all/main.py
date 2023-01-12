@@ -1,159 +1,183 @@
 import argparse
-import os
-import resource
-import sys
-import time
-from abc import ABC, abstractmethod
 
-import pathway as pw  # type:ignore
-from pathway.stdlib.graphs.pagerank import pagerank  # type:ignore
+import pathway as pw
+from pathway.internals import api, datasink, datasource, parse_graph
+from pathway.internals._io_helpers import _form_value_fields
+from pathway.internals.decorators import table_from_datasource
+from pathway.internals.rustpy_builder import RustpyBuilder
+from pathway.stdlib.graphs.pagerank import pagerank
+
+KAFKA_PORT = 8192
 
 
-class Benchmark(ABC):
-    def __init__(
-        self, autocommit_frequency_ms, channel, input_filename, *args, **kwargs
-    ):
+class Benchmark:
+    def __init__(self, autocommit_frequency_ms):
         self._autocommit_frequency_ms = autocommit_frequency_ms
-        self._channel = channel
-        self._input_filename = input_filename
 
     def get_rdkafka_settings(self):
-        using_benchmark_harness = os.environ.get("USING_BENCHMARK_HARNESS") == "1"
-        bootstrap_server = "kafka:9092" if using_benchmark_harness else "localhost:9092"
         return {
             "group.id": "$GROUP_NAME",
-            "bootstrap.servers": bootstrap_server,
+            "bootstrap.servers": "kafka:9092",
             "enable.partition.eof": "false",
             "session.timeout.ms": "60000",
             "enable.auto.commit": "true",
-            "queued.min.messages": "3000000",
         }
 
-    @abstractmethod
+    def construct_data_storage(self):
+        return api.DataStorage(
+            storage_type="kafka",
+            rdkafka_settings=self.get_rdkafka_settings(),
+            topics=["test_0"],
+        )
+
     def run_benchmark(self):
-        ...
+        raise NotImplementedError("You need to implement calculations for benchmark")
 
 
 class PagerankBenchmark(Benchmark):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.pagerank_steps = kwargs.get("pagerank_steps", 5)
-
-    def get_input_table(self):
-        if self._channel == "fs":
-            return pw.io.jsonlines.read(
-                path=self._input_filename,
-                mode="static",
-                primary_key=None,
-                value_columns=["u", "v"],
-                types={
-                    "u": pw.Type.INT,
-                    "v": pw.Type.INT,
-                },
-            )
-        elif self._channel == "kafka":
-            raise NotImplementedError(
-                "For Pagerank benchmark, only file IO is supported"
-            )
-        else:
-            raise ValueError("Unknown data channel: {}".format(self._channel))
-
     def run_benchmark(self):
-        input_table = self.get_input_table()
-        edges = input_table.select(
-            u=input_table.pointer_from(pw.this.u),
-            v=input_table.pointer_from(pw.this.v),
+        data_storage = self.construct_data_storage()
+        data_format = api.DataFormat(
+            format_type="jsonlines",
+            key_field_names=["id"],
+            value_fields=_form_value_fields(["id"], ["u", "v"]),
         )
-        print("Launching pagerank with {} steps...".format(self.pagerank_steps))
-        result = pagerank(edges, self.pagerank_steps)
-        pw.io.null.write(result)
-        pw.run()
+        edges_getter = table_from_datasource(
+            datasource.GenericDataSource(
+                data_storage,
+                data_format,
+                self._autocommit_frequency_ms,
+            )
+        )
+        edges = edges_getter.select(
+            u=edges_getter.pointer_from(pw.this.u),
+            v=edges_getter.pointer_from(pw.this.v),
+        )
+        result = pagerank(edges, 5)
+
+        data_storage = api.DataStorage(
+            storage_type="kafka",
+            rdkafka_settings=self.get_rdkafka_settings(),
+            topics=["test_1"],
+            commit_frequency_in_messages=100000,
+        )
+        data_format = api.DataFormat(
+            format_type="dsv",
+            key_field_names=[],
+            value_fields=_form_value_fields([], ["rank"]),
+            delimiter=",",
+        )
+        result.to(
+            datasink.GenericDataSink(
+                data_storage,
+                data_format,
+            )
+        )
+
+        RustpyBuilder(parse_graph.G).run_outputs()
 
 
 class WordcountBenchmark(Benchmark):
-    def get_input_table(self):
-        if self._channel == "fs":
-            return pw.io.jsonlines.read(
-                path=self._input_filename,
-                poll_new_objects=False,
-                primary_key=None,
-                value_columns=["word"],
-            )
-        elif self._channel == "kafka":
-            return pw.io.kafka.read(
-                rdkafka_settings=self.get_rdkafka_settings(),
-                topic_names=["test_0"],
-                format="json",
-                value_columns=["word"],
-                autocommit_duration_ms=self._autocommit_frequency_ms,
-            )
-        else:
-            raise ValueError("Unknown data channel: {}".format(self._channel))
-
-    def output_table(self, table):
-        if self._channel == "fs":
-            return pw.io.null.write(table)
-        elif self._channel == "kafka":
-            return pw.io.kafka.write(
-                table,
-                rdkafka_settings=self.get_rdkafka_settings(),
-                topic_name="test_1",
-                format="dsv",
-            )
-        else:
-            raise ValueError("Unknown data channel: {}".format(self._channel))
-
     def run_benchmark(self):
-        words = self.get_input_table()
+        data_storage = self.construct_data_storage()
+        data_format = api.DataFormat(
+            format_type="jsonlines",
+            key_field_names=None,
+            value_fields=_form_value_fields(None, ["word"]),
+        )
+        words = table_from_datasource(
+            datasource.GenericDataSource(
+                data_storage,
+                data_format,
+                self._autocommit_frequency_ms,
+            )
+        )
+
         result = words.groupby(words.word).reduce(
             words.word,
             count=pw.reducers.count(),
         )
-        self.output_table(result)
-        pw.run()
+
+        data_storage = api.DataStorage(
+            storage_type="kafka",
+            rdkafka_settings=self.get_rdkafka_settings(),
+            topics=["test_1"],
+            commit_frequency_in_messages=100000,
+        )
+        data_format = api.DataFormat(
+            format_type="dsv",
+            key_field_names=[],
+            value_fields=_form_value_fields([], ["word", "count"]),
+            delimiter=",",
+        )
+        result.to(
+            datasink.GenericDataSink(
+                data_storage,
+                data_format,
+            )
+        )
+
+        RustpyBuilder(parse_graph.G).run_outputs()
+
+
+class IncrementBenchmark(Benchmark):
+    def run_benchmark(self):
+        data_storage = self.construct_data_storage()
+        data_format = api.DataFormat(
+            format_type="jsonlines",
+            key_field_names=None,
+            value_fields=_form_value_fields(None, ["number"]),
+        )
+
+        numbers = table_from_datasource(
+            datasource.GenericDataSource(
+                data_storage,
+                data_format,
+                self._autocommit_frequency_ms,
+            )
+        )
+
+        result = numbers.select(number=pw.this.number).select(
+            increased_number=pw.cast(int, pw.this.number) + 1
+        )
+
+        data_storage = api.DataStorage(
+            storage_type="kafka",
+            rdkafka_settings=self.get_rdkafka_settings(),
+            topics=["test_1"],
+            commit_frequency_in_messages=100000,
+        )
+        data_format = api.DataFormat(
+            format_type="dsv",
+            key_field_names=[],
+            value_fields=_form_value_fields([], ["number"]),
+            delimiter=",",
+        )
+        result.to(
+            datasink.GenericDataSink(
+                data_storage,
+                data_format,
+            )
+        )
+
+        RustpyBuilder(parse_graph.G).run_outputs()
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Pathway benchmarker")
     parser.add_argument("--type", type=str, required=True)
     parser.add_argument("--autocommit-frequency-ms", type=int)
-    parser.add_argument("--channel", type=str, default="kafka", choices=["kafka", "fs"])
-    parser.add_argument("--input-filename", type=str)
-    parser.add_argument("--pagerank-steps", type=int, default=5)
     args = parser.parse_args()
 
     autocommit_frequency = args.autocommit_frequency_ms or None
 
     if args.type == "wordcount":
-        benchmark: Benchmark = WordcountBenchmark(
-            autocommit_frequency, args.channel, args.input_filename
-        )
+        benchmark = WordcountBenchmark(autocommit_frequency)
     elif args.type == "pagerank":
-        benchmark = PagerankBenchmark(
-            autocommit_frequency,
-            args.channel,
-            args.input_filename,
-            pagerank_steps=args.pagerank_steps,
-        )
+        benchmark = PagerankBenchmark(autocommit_frequency)  # type: ignore
+    elif args.type == "increment":
+        benchmark = IncrementBenchmark(autocommit_frequency)  # type: ignore
     else:
         raise RuntimeError("Unknown benchmark type: " + args.type)
 
-    before = time.time()
     benchmark.run_benchmark()
-    result = "runtime=pathway\tdataset=livejournal\tworkers={}\tsteps={}\ttime_elapsed={}\tmemory={}\n".format(
-        os.environ.get("PATHWAY_THREADS", 1),
-        args.pagerank_steps,
-        time.time() - before,
-        resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
-    )
-    print(result, file=sys.stderr)
-    with open(
-        "results/{}-{}-{}-{}.txt".format(
-            args.type,
-            args.pagerank_steps,
-            os.environ.get("PATHWAY_THREADS", 1),
-            time.time(),
-        ),
-        "w",
-    ) as f:
-        f.write(result)

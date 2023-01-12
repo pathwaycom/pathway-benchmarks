@@ -1,49 +1,66 @@
 version: "3.8"
 services:
   zookeeper:
-    extends:
-      file: common-services.yml
-      service: zookeeper-common
+    image: wurstmeister/zookeeper
   kafka:
-    extends:  
-      file: common-services.yml
-      service: kafka-common
-  streamer:
-    extends:
-      file: common-services.yml
-      service: streamer-common
-    
+    image: wurstmeister/kafka
+    ports:
+      - "${KAFKA_PORT}:9092"
     depends_on:
-      pathway-all:
+      zookeeper:
         condition: service_started
-      
-  stats-collector:
-    extends:
-      file: common-services.yml
-      service: stats-collector-common
-
+    environment:
+      DOCKER_API_VERSION: 1.22
+      HOSTNAME_COMMAND: "route -n | awk '/UG[ \t]/{print $$2}'"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CREATE_TOPICS: "test_0:1:1:delete,test_1:1:1:delete"
+      KAFKA_DELETE_TOPIC_ENABLE: "true"
+      KAFKA_LOG_RETENTION_HOURS: -1
+      KAFKA_LOG_RETENTION_BYTES: -1
+      KAFKA_LOG_CLEANER_MIN_COMPACTION_LAG_MS: 1000000000
+      KAFKA_LOG_SEGMENT_MS: 10000
+      KAFKA_MIN_CLEANABLE_DIRTY_RATIO: 1
+    healthcheck:
+      test: [ "CMD", "nc", "-vz", "localhost", "9092" ]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
   pathway-all:
-    cpuset: $TESTED_CPU_SET
-    build:
-      context: ../
-      dockerfile: ./services/pathway-all/Dockerfile
-    deploy:
-      resources:
-        limits:
-          memory: 32G
-    cap_add:
-      - SYS_PTRACE
+    build: ../services/pathway-all/
     environment:
       - AUTOCOMMIT_FREQUENCY_MS
       - BENCHMARK_TYPE
       - COMMIT_FREQUENCY
       - RATE_PER_SECOND
-      - CORES
-      - WORKERS
-      - PATHWAY_YOLO_RARE_WAKEUPS
     depends_on:
       kafka:
         condition: service_healthy
+  streamer:
+    build: ../services/streamer/
+    environment:
+      - AUTOCOMMIT_FREQUENCY_MS
+      - BENCHMARK_TYPE
+      - COMMIT_FREQUENCY
+      - RATE_PER_SECOND
+    depends_on:
+      kafka:
+        condition: service_healthy
+      pathway-all:
+        condition: service_started
+  stats-collector:
+    build: ../services/stats-collector/
+    environment:
+      - AUTOCOMMIT_FREQUENCY_MS
+      - BENCHMARK_TYPE
+      - COMMIT_FREQUENCY
+      - ENGINE_TYPE
+      - RATE_PER_SECOND
+    depends_on:
+      pathway-all:
+        condition: service_completed_successfully
+      streamer:
+        condition: service_completed_successfully
     volumes:
-      - "./results:/pathway-all/results"
-
+      - "./results:/stats-collector/results"

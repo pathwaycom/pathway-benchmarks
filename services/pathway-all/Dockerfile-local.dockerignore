@@ -1,5 +1,0 @@
-**
-!public/pathway
-!third_party/timely
-!.git
-!public/pathway-benchmarks/services/pathway-all/main.py

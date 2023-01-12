@@ -4,5 +4,4 @@ services/streamer/datasets/wordcount-large.csv
 services/streamer/datasets/pagerank.tsv
 docker-compose/results
 services/streamer/datasets/pagerank.json
-utils/*.png
-.DS_Store
+services/streamer/datasets/increment-large.json
