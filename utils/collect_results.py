@@ -1,5 +1,17 @@
 import os
-from typing import Dict, List
+
+BENCHMARKS = [
+    "increment",
+    "pagerank",
+    "wordcount",
+]
+
+ENGINES = [
+    "spark",
+    "pathway",
+]
+
+PATHWAY_ENGINE_NAME = "pathway"
 
 
 def read_tokens(first_token, path):
@@ -9,23 +21,79 @@ def read_tokens(first_token, path):
     return tokens
 
 
-if __name__ == "__main__":
-    data: Dict[str, List] = {}
-    results = os.listdir("../docker-compose/results/")
-    for fname in results:
-        if not fname.endswith("-latency.txt"):
+def render_time_unaware_results(engine_name, benchmark_type):
+    folder_path = "../docker-compose/results/{}/".format(engine_name)
+    raw_result_logs = os.listdir(folder_path)
+    data_points = {}
+
+    for log_name in raw_result_logs:
+        if not log_name.startswith(benchmark_type):
             continue
-        tokens = fname[:-4].split("-")
-        task_instance = "{}-latency-{}".format(tokens[0], tokens[1])
-        if task_instance not in data:
-            data[task_instance] = []
-        data[task_instance].append(
-            read_tokens(tokens[2], "../docker-compose/results/{}".format(fname))
+        if not log_name.endswith("-unaware-latency.txt"):
+            continue
+        tokens = log_name.split("-")
+        rate = tokens[2]
+        data_points[rate] = read_tokens(rate, os.path.join(folder_path, log_name))
+
+    data_points_unique = []
+    for _, data_point in data_points.items():
+        data_points_unique.append(data_point)
+
+    data_points_unique.sort(key=lambda x: int(x[0]))
+    with open(
+        "../results/{}/{}-unaware.csv".format(benchmark_type, engine_name), "w"
+    ) as f:
+        f.write("rps,diff_begin,diff_end,diff_max\n")
+        for entry in data_points_unique:
+            f.write("{}\n".format(",".join(entry)))
+
+
+def render_time_aware_pathway_results(benchmark_type):
+    folder_path = "../docker-compose/results/pathway/"
+    raw_result_logs = os.listdir(folder_path)
+    data_points = {}
+
+    for log_name in raw_result_logs:
+        if not log_name.startswith(benchmark_type):
+            continue
+        if log_name.endswith("-unaware-latency.txt") or not log_name.endswith(
+            "-latency.txt"
+        ):
+            continue
+        tokens = log_name.split("-")
+
+        commit_frequency = tokens[1]
+        rate = tokens[2]
+
+        if commit_frequency not in data_points:
+            data_points[commit_frequency] = []
+        data_points[commit_frequency].append(
+            read_tokens(rate, os.path.join(folder_path, log_name))
         )
 
-    for k, v in data.items():
-        v.sort(key=lambda x: int(x[0]))
-        with open("../results/{}.csv".format(k), "w") as f:
+    for commit_frequency, stats in data_points.items():
+        stats.sort(key=lambda x: int(x[0]))
+        with open(
+            "../results/{}/pathway-{}.csv".format(benchmark_type, commit_frequency), "w"
+        ) as f:
             f.write("rps,diff_begin,diff_end,diff_max\n")
-            for entry in v:
+            for entry in stats:
                 f.write("{}\n".format(",".join(entry)))
+
+
+def render_pathway_results(benchmark_type):
+    render_time_unaware_results(PATHWAY_ENGINE_NAME, benchmark_type)
+    render_time_aware_pathway_results(benchmark_type)
+
+
+def render_non_native_results(benchmark_type, engine_name):
+    render_time_unaware_results(engine_name, benchmark_type)
+
+
+if __name__ == "__main__":
+    for benchmark_type in BENCHMARKS:
+        for engine_name in ENGINES:
+            if engine_name == PATHWAY_ENGINE_NAME:
+                render_pathway_results(benchmark_type)
+            else:
+                render_non_native_results(benchmark_type, engine_name)
