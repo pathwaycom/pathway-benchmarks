@@ -40,11 +40,32 @@ ENGINE_TYPE=pathway BENCHMARK_TYPE=wordcount COMMIT_FREQUENCY=5 RATE_PER_SECOND=
 ENGINE_TYPE=pathway BENCHMARK_TYPE=wordcount COMMIT_FREQUENCY=5 RATE_PER_SECOND=500000 AUTOCOMMIT_FREQUENCY_MS=100 docker-compose -f docker-compose-pathway.yml run stats-collector
 ENGINE_TYPE=pathway BENCHMARK_TYPE=wordcount COMMIT_FREQUENCY=5 RATE_PER_SECOND=500000 AUTOCOMMIT_FREQUENCY_MS=100 docker-compose -f docker-compose-pathway.yml down -v
 
+ENGINE_TYPE=pathway BENCHMARK_TYPE=wordcount COMMIT_FREQUENCY=5 RATE_PER_SECOND=550000 AUTOCOMMIT_FREQUENCY_MS=100 docker-compose -f docker-compose-pathway.yml run stats-collector
+ENGINE_TYPE=pathway BENCHMARK_TYPE=wordcount COMMIT_FREQUENCY=5 RATE_PER_SECOND=550000 AUTOCOMMIT_FREQUENCY_MS=100 docker-compose -f docker-compose-pathway.yml down -v
+
 ENGINE_TYPE=pathway BENCHMARK_TYPE=wordcount COMMIT_FREQUENCY=5 RATE_PER_SECOND=600000 AUTOCOMMIT_FREQUENCY_MS=100 docker-compose -f docker-compose-pathway.yml run stats-collector
 ENGINE_TYPE=pathway BENCHMARK_TYPE=wordcount COMMIT_FREQUENCY=5 RATE_PER_SECOND=600000 AUTOCOMMIT_FREQUENCY_MS=100 docker-compose -f docker-compose-pathway.yml down -v
 
+ENGINE_TYPE=pathway BENCHMARK_TYPE=wordcount COMMIT_FREQUENCY=5 RATE_PER_SECOND=650000 AUTOCOMMIT_FREQUENCY_MS=100 docker-compose -f docker-compose-pathway.yml run stats-collector
+ENGINE_TYPE=pathway BENCHMARK_TYPE=wordcount COMMIT_FREQUENCY=5 RATE_PER_SECOND=650000 AUTOCOMMIT_FREQUENCY_MS=100 docker-compose -f docker-compose-pathway.yml down -v
+
+ENGINE_TYPE=pathway BENCHMARK_TYPE=wordcount COMMIT_FREQUENCY=5 RATE_PER_SECOND=700000 AUTOCOMMIT_FREQUENCY_MS=100 docker-compose -f docker-compose-pathway.yml run stats-collector
+ENGINE_TYPE=pathway BENCHMARK_TYPE=wordcount COMMIT_FREQUENCY=5 RATE_PER_SECOND=700000 AUTOCOMMIT_FREQUENCY_MS=100 docker-compose -f docker-compose-pathway.yml down -v
+
 ENGINE_TYPE=pathway BENCHMARK_TYPE=wordcount COMMIT_FREQUENCY=5 RATE_PER_SECOND=750000 AUTOCOMMIT_FREQUENCY_MS=100 docker-compose -f docker-compose-pathway.yml run stats-collector
 ENGINE_TYPE=pathway BENCHMARK_TYPE=wordcount COMMIT_FREQUENCY=5 RATE_PER_SECOND=750000 AUTOCOMMIT_FREQUENCY_MS=100 docker-compose -f docker-compose-pathway.yml down -v
+
+ENGINE_TYPE=pathway BENCHMARK_TYPE=wordcount COMMIT_FREQUENCY=5 RATE_PER_SECOND=800000 AUTOCOMMIT_FREQUENCY_MS=100 docker-compose -f docker-compose-pathway.yml run stats-collector
+ENGINE_TYPE=pathway BENCHMARK_TYPE=wordcount COMMIT_FREQUENCY=5 RATE_PER_SECOND=800000 AUTOCOMMIT_FREQUENCY_MS=100 docker-compose -f docker-compose-pathway.yml down -v
+
+ENGINE_TYPE=pathway BENCHMARK_TYPE=wordcount COMMIT_FREQUENCY=5 RATE_PER_SECOND=850000 AUTOCOMMIT_FREQUENCY_MS=100 docker-compose -f docker-compose-pathway.yml run stats-collector
+ENGINE_TYPE=pathway BENCHMARK_TYPE=wordcount COMMIT_FREQUENCY=5 RATE_PER_SECOND=850000 AUTOCOMMIT_FREQUENCY_MS=100 docker-compose -f docker-compose-pathway.yml down -v
+
+ENGINE_TYPE=pathway BENCHMARK_TYPE=wordcount COMMIT_FREQUENCY=5 RATE_PER_SECOND=900000 AUTOCOMMIT_FREQUENCY_MS=100 docker-compose -f docker-compose-pathway.yml run stats-collector
+ENGINE_TYPE=pathway BENCHMARK_TYPE=wordcount COMMIT_FREQUENCY=5 RATE_PER_SECOND=900000 AUTOCOMMIT_FREQUENCY_MS=100 docker-compose -f docker-compose-pathway.yml down -v
+
+ENGINE_TYPE=pathway BENCHMARK_TYPE=wordcount COMMIT_FREQUENCY=5 RATE_PER_SECOND=950000 AUTOCOMMIT_FREQUENCY_MS=100 docker-compose -f docker-compose-pathway.yml run stats-collector
+ENGINE_TYPE=pathway BENCHMARK_TYPE=wordcount COMMIT_FREQUENCY=5 RATE_PER_SECOND=950000 AUTOCOMMIT_FREQUENCY_MS=100 docker-compose -f docker-compose-pathway.yml down -v
 
 ENGINE_TYPE=pathway BENCHMARK_TYPE=wordcount COMMIT_FREQUENCY=5 RATE_PER_SECOND=1000000 AUTOCOMMIT_FREQUENCY_MS=100 docker-compose -f docker-compose-pathway.yml run stats-collector
 ENGINE_TYPE=pathway BENCHMARK_TYPE=wordcount COMMIT_FREQUENCY=5 RATE_PER_SECOND=1000000 AUTOCOMMIT_FREQUENCY_MS=100 docker-compose -f docker-compose-pathway.yml down -v
