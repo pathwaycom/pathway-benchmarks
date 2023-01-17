@@ -6,10 +6,7 @@ BENCHMARKS = [
     "wordcount",
 ]
 
-ENGINES = [
-    "spark",
-    "pathway",
-]
+ENGINES = ["spark", "pathway", "kafka-streams"]
 
 PATHWAY_ENGINE_NAME = "pathway"
 

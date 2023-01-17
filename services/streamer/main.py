@@ -31,7 +31,6 @@ class BenchmarkStreamer:
                 ):
                     fw.write("*COMMIT*\n")
                     rows_in_batch = 0
-            fw.write("*FINISH*\n")
 
     def wait_for_engine_to_start(self):
         time.sleep(60)

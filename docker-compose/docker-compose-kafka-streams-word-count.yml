@@ -27,16 +27,6 @@ services:
       retries: 10
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-  pathway-all:
-    build: ../services/pathway-all/
-    environment:
-      - AUTOCOMMIT_FREQUENCY_MS
-      - BENCHMARK_TYPE
-      - COMMIT_FREQUENCY
-      - RATE_PER_SECOND
-    depends_on:
-      kafka:
-        condition: service_healthy
   streamer:
     build: ../services/streamer/
     environment:
@@ -47,7 +37,7 @@ services:
     depends_on:
       kafka:
         condition: service_healthy
-      pathway-all:
+      kafka-streams-word-count:
         condition: service_started
   stats-collector:
     build: ../services/stats-collector/
@@ -62,3 +52,10 @@ services:
         condition: service_completed_successfully
     volumes:
       - "./results:/stats-collector/results"
+  kafka-streams-word-count:
+    build: ../services/kafka-streams-word-count
+    depends_on:
+      kafka:
+        condition: service_healthy
+    environment:
+      - AUTOCOMMIT_FREQUENCY_MS
