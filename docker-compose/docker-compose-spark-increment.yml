@@ -56,8 +56,8 @@ services:
       - SPARK_WORKLOAD=worker
       - SPARK_LOCAL_IP=spark-worker
 
-  spark-word-count:
-    build: ../services/spark-word-count/
+  spark-increment:
+    build: ../services/spark-increment/
     depends_on:
       - spark-master
       - spark-worker
@@ -66,7 +66,7 @@ services:
       - BENCHMARK_TYPE
       - COMMIT_FREQUENCY
       - RATE_PER_SECOND
-         
+
   streamer:
     build: ../services/streamer/
     environment:
@@ -77,7 +77,7 @@ services:
     depends_on:
       kafka:
         condition: service_healthy
-      spark-word-count:
+      spark-increment:
         condition: service_started
   stats-collector:
     build: ../services/stats-collector/

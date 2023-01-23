@@ -1,8 +1,8 @@
 import argparse
 
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, concat_ws, from_json
-from pyspark.sql.types import StringType, StructField, StructType
+from pyspark.sql.functions import col, from_json
+from pyspark.sql.types import IntegerType, StructField, StructType
 
 IN_BOOTSTRAP_SERVERS = "kafka:9092"
 OUT_BOOTSTRAP_SERVERS = "kafka:9092"
@@ -16,25 +16,20 @@ OUT_TOPIC = "test_1"
 COMMIT_INTERVAL = "100 milliseconds"
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--commit_interval", help="microbatch length")
+parser.add_argument("--commit_interval", help="amount of time between checkpoints")
 args = parser.parse_args()
 if args.commit_interval:
     COMMIT_INTERVAL = args.commit_interval + " milliseconds"
 
 
 spark = SparkSession.builder.appName(
-    "StructuredStreamingWordCountKafkaToKafka"
+    "StructuredStreamingContinuousIncrement"
 ).getOrCreate()
 
 
 # that disables all further INFO / DEBUG logs, not sure how properly disable them
 # from the very beginning
 spark.sparkContext.setLogLevel("WARN")
-schema = StructType(
-    [
-        StructField("word", StringType(), True),
-    ]
-)
 
 # set up input topic
 df = (
@@ -46,31 +41,29 @@ df = (
 )
 
 # parse json
+schema = StructType(
+    [
+        StructField("number", IntegerType(), True),
+    ]
+)
 json = (
-    df.selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)")
+    df.selectExpr("CAST(value AS STRING)")
     .select(from_json(col("value"), schema).alias("data"))
     .select("data.*")
 )
 
-
-# generate running word count
-wordCounts = (
-    json.groupBy("word")
-    .count()
-    .withColumnRenamed("count", "wcount")
-    .selectExpr("word", "CAST(wcount AS STRING)")
-)
-output = wordCounts.select(
-    concat_ws(",", wordCounts.word, wordCounts.wcount).alias("value")
+# increment
+output = json.select((json.number + 1).alias("value")).selectExpr(
+    "CAST(value AS STRING)"
 )
 
 # set up output topic
-output.writeStream.outputMode("update").format("kafka").option(
+output.writeStream.outputMode("append").format("kafka").option(
     "checkpointLocation", "./chkpt"
 ).option("kafka.bootstrap.servers", OUT_BOOTSTRAP_SERVERS).option(
     "topic", OUT_TOPIC
 ).option(
     "enable.partition.eof", "false"
 ).trigger(
-    processingTime=COMMIT_INTERVAL
+    continuous=COMMIT_INTERVAL
 ).start().awaitTermination()

@@ -1,4 +1,4 @@
-ENGINE_TYPE=spark BENCHMARK_TYPE=wordcount COMMIT_FREQUENCY=5 RATE_PER_SECOND=25000 AUTOCOMMIT_FREQUENCY_MS=100 docker-compose -f docker-compose-spark-word-count.yml run stats-collector
+ENGINE_TYPE=spark BENCHMARK_TYPE=increment COMMIT_FREQUENCY=5 RATE_PER_SECOND=25000 AUTOCOMMIT_FREQUENCY_MS=100 docker-compose --env-file variables.env -f docker-compose-spark-word-count.yml up stats-collector --scale spark-worker=2  1>log_run.txt 2>&1
 ENGINE_TYPE=spark BENCHMARK_TYPE=wordcount COMMIT_FREQUENCY=5 RATE_PER_SECOND=25000 AUTOCOMMIT_FREQUENCY_MS=100 docker-compose -f docker-compose-spark-word-count.yml down -v
 
 ENGINE_TYPE=spark BENCHMARK_TYPE=wordcount COMMIT_FREQUENCY=5 RATE_PER_SECOND=50000 AUTOCOMMIT_FREQUENCY_MS=100 docker-compose -f docker-compose-spark-word-count.yml run stats-collector
