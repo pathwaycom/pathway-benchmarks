@@ -20,7 +20,10 @@ def read_tokens(first_token, path):
 
 def render_time_unaware_results(engine_name, benchmark_type):
     folder_path = "../docker-compose/results/{}/".format(engine_name)
-    raw_result_logs = os.listdir(folder_path)
+    try:
+        raw_result_logs = os.listdir(folder_path)
+    except FileNotFoundError:
+        return
     data_points = {}
 
     for log_name in raw_result_logs:
