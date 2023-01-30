@@ -1,29 +1,21 @@
-package com.pathway.benchmarks.kstreams.wordcount
+package com.pathway.benchmarks.kstreams
 
 import mu.KotlinLogging
-import org.apache.kafka.common.serialization.Serdes
-import org.apache.kafka.streams.KafkaStreams
-import org.apache.kafka.streams.StreamsBuilder
+import com.pathway.benchmarks.kstreams.Config
 import org.apache.kafka.streams.StreamsConfig
-import org.apache.kafka.streams.kstream.*
+import com.pathway.benchmarks.kstreams.benchmarks.wordcount.wordcount
+import com.pathway.benchmarks.kstreams.benchmarks.increment.increment
+import kotlin.system.exitProcess
 import java.util.*
 import java.util.concurrent.CountDownLatch
-import kotlin.system.exitProcess
-import com.pathway.benchmarks.kstreams.Config
-import com.pathway.benchmarks.kstreams.serde
-import org.apache.kafka.streams.kstream.Materialized;
-import kotlinx.serialization.*
+import org.apache.kafka.streams.KafkaStreams
+import org.apache.kafka.common.serialization.Serdes
+
 
 val logger = KotlinLogging.logger {}
 
-@Serializable
-class InputModel {
-    var word: String = ""
-}
-
 fun main() {
     val config = Config()
-
     logger.info(config.toString())
 
     val props = Properties().apply {
@@ -34,17 +26,13 @@ fun main() {
         put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, config.autoCommitFrequency)
     }
 
-    val builder = StreamsBuilder()
-
-    val source: KStream<String, InputModel> =
-            builder.stream(config.inputTopic, Consumed.with(Serdes.String(), serde<InputModel>()))
-
-    val wordCounts = source
-            .groupBy { _, v -> v.word }
-            .count()
-            .mapValues { k, v -> "$k,$v" }
-
-    wordCounts.toStream().to(config.outputTopic, Produced.with(Serdes.String(), Serdes.String()));
+    val builder = when (config.benchmarkType) {
+        "wordcount" -> wordcount(config)
+        "increment" -> increment(config)
+        else -> {
+            throw RuntimeException("Unknown benchmark type: ${config.benchmarkType}")
+        }
+    }
 
     val streams = KafkaStreams(builder.build(), props)
     val latch = CountDownLatch(1)

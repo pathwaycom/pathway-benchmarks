@@ -128,10 +128,10 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <finalName>kafka-streams-word-count</finalName>
+                    <finalName>kafka-streams-benchmark</finalName>
                     <archive>
                         <manifest>
-                            <mainClass>com.pathway.benchmarks.kstreams.wordcount.MainKt</mainClass>
+                            <mainClass>com.pathway.benchmarks.kstreams.MainKt</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

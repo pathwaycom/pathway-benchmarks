@@ -37,7 +37,7 @@ services:
     depends_on:
       kafka:
         condition: service_healthy
-      kafka-streams-word-count:
+      kafka-streams-benchmark:
         condition: service_started
   stats-collector:
     build: ../services/stats-collector/
@@ -52,10 +52,11 @@ services:
         condition: service_completed_successfully
     volumes:
       - "./results:/stats-collector/results"
-  kafka-streams-word-count:
-    build: ../services/kafka-streams-word-count
+  kafka-streams-benchmark:
+    build: ../services/kafka-streams
     depends_on:
       kafka:
         condition: service_healthy
     environment:
       - AUTOCOMMIT_FREQUENCY_MS
+      - BENCHMARK_TYPE
