@@ -14,13 +14,5 @@ itertools = "0.10.5"
 
 
 [[bin]]
-name = "wordcount_stats_collector"
-path = "src/wordcount_stats_collector.rs"
-
-[[bin]]
-name = "increment_stats_collector"
+name = "stats_collector"
 path = "src/increment_stats_collector.rs"
-
-[[bin]]
-name = "kafka_io_record"
-path = "src/kafka_io_record.rs"

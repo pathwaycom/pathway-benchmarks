@@ -1,20 +1,21 @@
 import os
 
 BENCHMARKS = [
-    "increment",
-    "pagerank",
-    "wordcount",
+    # "increment",
+    # "pagerank",
+    "wordcount"
 ]
 
-ENGINES = ["spark", "pathway", "kafka-streams"]
+ENGINES = ["spark", "pathway"]  # , "kstreams", "spark_scala"]
 
 PATHWAY_ENGINE_NAME = "pathway"
 
 
 def read_tokens(first_token, path):
+    tokens = [first_token]
     with open(path, "r") as f:
-        tokens = f.read().split(",")
-    tokens = [first_token] + tokens
+        for line in f.readlines():
+            tokens += [line.split(",")[1].rstrip("\n")]
     return tokens
 
 
@@ -31,8 +32,9 @@ def render_time_unaware_results(engine_name, benchmark_type):
             continue
         if not log_name.endswith("-unaware-latency.txt"):
             continue
+        print(log_name)
         tokens = log_name.split("-")
-        rate = tokens[2]
+        rate = tokens[6]
         data_points[rate] = read_tokens(rate, os.path.join(folder_path, log_name))
 
     data_points_unique = []
@@ -41,9 +43,12 @@ def render_time_unaware_results(engine_name, benchmark_type):
 
     data_points_unique.sort(key=lambda x: int(x[0]))
     with open(
-        "../results/{}/{}-unaware.csv".format(benchmark_type, engine_name), "w"
+        "../docker-compose/results/{}/{}-unaware.csv".format(
+            benchmark_type, engine_name
+        ),
+        "w+",
     ) as f:
-        f.write("rps,diff_begin,diff_end,diff_max\n")
+        f.write("rps,min,1,5,10,20,30,40,median,60,70,80,90,95,99,max,lost\n")
         for entry in data_points_unique:
             f.write("{}\n".format(",".join(entry)))
 
@@ -64,7 +69,6 @@ def render_time_aware_pathway_results(benchmark_type):
 
         commit_frequency = tokens[1]
         rate = tokens[2]
-
         if commit_frequency not in data_points:
             data_points[commit_frequency] = []
         data_points[commit_frequency].append(
@@ -83,7 +87,7 @@ def render_time_aware_pathway_results(benchmark_type):
 
 def render_pathway_results(benchmark_type):
     render_time_unaware_results(PATHWAY_ENGINE_NAME, benchmark_type)
-    render_time_aware_pathway_results(benchmark_type)
+    # render_time_aware_pathway_results(benchmark_type)
 
 
 def render_non_native_results(benchmark_type, engine_name):

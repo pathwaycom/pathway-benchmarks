@@ -28,12 +28,17 @@ fn main() {
 
     let producer: BaseProducer = client_config.create().unwrap();
 
+    //more like time to send 1000 messages, to hit 1 second after messages per second
+    //name sleep_after_each_1000_mcs is confusing, should be something that denotes the length of a block
+    //(mps / 1000) blocklen = 1000000
+
     let sleep_after_each_1000_mcs = 1_000_000_000 / messages_per_second;
 
     let mut n_sent = 0;
     let file = File::open(dataset_path).unwrap();
 
     let start_time = Instant::now();
+
     for line in BufReader::new(file).lines() {
         producer
             .send(BaseRecord::to("test_0").payload(&line.unwrap()).key(""))

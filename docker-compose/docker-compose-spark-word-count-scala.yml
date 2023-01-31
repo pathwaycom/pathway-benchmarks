@@ -2,8 +2,18 @@ version: "3.8"
 services:
   zookeeper:
     image: wurstmeister/zookeeper
+    deploy:
+      resources:
+        limits:
+          memory: 64G    
+
   kafka:
     image: wurstmeister/kafka
+    deploy:
+      resources:
+        limits:
+          memory: 8G    
+   
     ports:
       - "${KAFKA_PORT}:9092"
     depends_on:
@@ -27,8 +37,13 @@ services:
       retries: 10
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-  spark-master:
+  spark-master:  
     build: ../services/spark-cluster/
+    deploy:
+      resources:
+        limits:
+          memory: 16G    
+ 
     depends_on:
       - kafka
     ports:
@@ -38,8 +53,13 @@ services:
       - SPARK_LOCAL_IP=spark-master
       - SPARK_WORKLOAD=master
   
-  spark-worker:
+  spark-worker:    
     build: ../services/spark-cluster/
+    deploy:
+      replicas: ${WORKERS}
+      resources:
+        limits:
+          memory: 16G    
 
     ports:
       - "9000-9010:8080"
@@ -50,14 +70,19 @@ services:
     environment:
       - SPARK_MASTER=spark://spark-master:7077
       - SPARK_WORKER_CORES=1
-      - SPARK_WORKER_MEMORY=1G
-      - SPARK_DRIVER_MEMORY=1G
-      - SPARK_EXECUTOR_MEMORY=1G
+      - SPARK_WORKER_MEMORY=16G
+      - SPARK_DRIVER_MEMORY=16G
+      - SPARK_EXECUTOR_MEMORY=16G
       - SPARK_WORKLOAD=worker
       - SPARK_LOCAL_IP=spark-worker
 
-  spark-increment:
-    build: ../services/spark-increment/
+  spark-word-count:
+    deploy:
+      resources:
+        limits:
+          memory: 16G    
+   
+    build: ../services/spark-word-count-scala/
     depends_on:
       - spark-master
       - spark-worker
@@ -68,9 +93,14 @@ services:
       - RATE_PER_SECOND
       - CORES
       - WORKERS
-
-  streamer:
+         
+  streamer:  
     build: ../services/streamer/
+    deploy:
+      resources:
+        limits:
+          memory: 16G    
+  
     environment:
       - AUTOCOMMIT_FREQUENCY_MS
       - BENCHMARK_TYPE
@@ -79,10 +109,15 @@ services:
     depends_on:
       kafka:
         condition: service_healthy
-      spark-increment:
+      spark-word-count:
         condition: service_started
   stats-collector:
     build: ../services/stats-collector/
+    deploy:
+      resources:
+        limits:
+          memory: 16G    
+   
     environment:
       - AUTOCOMMIT_FREQUENCY_MS
       - BENCHMARK_TYPE

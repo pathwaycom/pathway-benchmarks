@@ -3,10 +3,10 @@ import subprocess
 import time
 
 
-def calculate_stats(instance_name):
+def calculate_stats(collector_args):
     start_at = time.time()
 
-    args = "cargo run -- {}".format(instance_name).split()
+    args = "cargo run --bin stats_collector {}".format(collector_args).split()
     popen = subprocess.Popen(args, stdout=subprocess.PIPE)
     popen.wait()
 
@@ -15,7 +15,7 @@ def calculate_stats(instance_name):
 
 
 def wait_for_engine_finish():
-    time.sleep(120.0)
+    time.sleep(40.0)
 
 
 if __name__ == "__main__":
@@ -32,6 +32,11 @@ if __name__ == "__main__":
     parser.add_argument("--rate-per-second", type=int, default=10**6)
     parser.add_argument("--autocommit-frequency-ms", type=int)
     parser.add_argument("--engine-type", type=str, required=True)
+    parser.add_argument("--workers", type=int, default=1)
+    parser.add_argument("--cores", type=int, default=1)
+    parser.add_argument("--stats_short", type=int, default=1)
+    parser.add_argument("--stats_timeline", type=int, default=1)
+    parser.add_argument("--stats_pathway_ptime_aggregated", type=int, default=1)
     args = parser.parse_args()
 
     wait_for_engine_finish()
@@ -41,12 +46,21 @@ if __name__ == "__main__":
     else:
         benchmark_kind = "unaware"
 
-    instance_name = "{}/{}-{}-{}-{}".format(
+    instance_name = "{}/{}-{}-{}-{}-{}-{}-{}-{}".format(
         args.engine_type,
         args.type,
+        time.time(),
+        args.workers,
+        args.cores,
+        args.autocommit_frequency_ms,
         args.batch_size,
         args.rate_per_second,
         benchmark_kind,
     )
+
+    collector_output_type = " --stats_short {} --stats_timeline {} --stats_pathway_ptime_aggregated {}".format(
+        args.stats_short, args.stats_timeline, args.stats_pathway_ptime_aggregated
+    )
+
     print("Instance name:", instance_name)
-    calculate_stats(instance_name)
+    calculate_stats(instance_name + collector_output_type)

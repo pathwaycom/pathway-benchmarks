@@ -33,7 +33,7 @@ class BenchmarkStreamer:
                     rows_in_batch = 0
 
     def wait_for_engine_to_start(self):
-        time.sleep(60)
+        time.sleep(90)
 
     def run_streaming(self):
         self.prepare_dataset_with_commits()

@@ -39,7 +39,7 @@ schema = StructType(
 # set up input topic
 df = (
     spark.readStream.format("kafka")
-    .option("startingOffsets", "earliest")
+    .option("startingOffsets", "latest")
     .option("kafka.bootstrap.servers", IN_BOOTSTRAP_SERVERS)
     .option("subscribe", IN_TOPIC)
     .load()
