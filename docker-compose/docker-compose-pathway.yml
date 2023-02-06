@@ -63,12 +63,11 @@ services:
       kafka:
         condition: service_healthy
       pathway-all:
-        condition: service_started
-  
-  stats-collector-wordcount:
+        condition: service_started  
+  stats-collector:
     build: 
       context: ../services/stats-collector/
-      dockerfile: Dockerfile-wordcount
+      dockerfile: Dockerfile
     environment:
       - AUTOCOMMIT_FREQUENCY_MS
       - BENCHMARK_TYPE
@@ -84,47 +83,4 @@ services:
       streamer:
         condition: service_completed_successfully
     volumes:
-      - "./results:/stats-collector-wordcount/results"
-
-  stats-collector-increment:
-    build: 
-      context: ../services/stats-collector/
-      dockerfile: Dockerfile-increment
-    environment:
-      - AUTOCOMMIT_FREQUENCY_MS
-      - BENCHMARK_TYPE
-      - COMMIT_FREQUENCY
-      - ENGINE_TYPE
-      - RATE_PER_SECOND
-      - CORES
-      - WORKERS
-      - STATS_SHORT
-      - STATS_TIMELINE 
-      - STATS_PATHWAY_PTIME_AGGREGATED
-    depends_on:
-      streamer:
-        condition: service_completed_successfully
-    volumes:
-      - "./results:/stats-collector-increment/results"
-
-  kafka_io_record:
-    build: 
-      context: ../services/stats-collector/
-      dockerfile: Dockerfile-kafka_io_record
-    environment:
-      - AUTOCOMMIT_FREQUENCY_MS
-      - BENCHMARK_TYPE
-      - COMMIT_FREQUENCY
-      - ENGINE_TYPE
-      - RATE_PER_SECOND
-      - CORES
-      - WORKERS
-      - STATS_SHORT
-      - STATS_TIMELINE 
-      - STATS_PATHWAY_PTIME_AGGREGATED
-    depends_on:
-      streamer:
-        condition: service_completed_successfully
-    volumes:
-      - "./results:/kafka_io_record/results"
-
+      - "./results:/stats-collector/results"

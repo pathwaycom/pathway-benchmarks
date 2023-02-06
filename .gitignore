@@ -5,3 +5,5 @@ services/streamer/datasets/pagerank.tsv
 docker-compose/results
 services/streamer/datasets/pagerank.json
 services/streamer/datasets/increment-large.json
+utils/graph.png
+services/streamer/datasets/weighted-wordcount-large.csv

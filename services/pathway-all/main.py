@@ -120,6 +120,49 @@ class WordcountBenchmark(Benchmark):
         RustpyBuilder(parse_graph.G).run_outputs()
 
 
+class WeightedWordcountBenchmark(Benchmark):
+    def run_benchmark(self):
+        data_storage = self.construct_data_storage()
+        data_format = api.DataFormat(
+            format_type="jsonlines",
+            key_field_names=None,
+            value_fields=_form_value_fields(None, ["word", "weight"]),
+        )
+        words = table_from_datasource(
+            datasource.GenericDataSource(
+                data_storage,
+                data_format,
+                self._autocommit_frequency_ms,
+            )
+        )
+
+        result = words.groupby(words.word).reduce(
+            words.word,
+            count=pw.reducers.sum(words.weight),
+        )
+
+        data_storage = api.DataStorage(
+            storage_type="kafka",
+            rdkafka_settings=self.get_rdkafka_settings(),
+            topics=["test_1"],
+            commit_frequency_in_messages=100000,
+        )
+        data_format = api.DataFormat(
+            format_type="dsv",
+            key_field_names=[],
+            value_fields=_form_value_fields([], ["word", "count"]),
+            delimiter=",",
+        )
+        result.to(
+            datasink.GenericDataSink(
+                data_storage,
+                data_format,
+            )
+        )
+
+        RustpyBuilder(parse_graph.G).run_outputs()
+
+
 class IncrementBenchmark(Benchmark):
     def run_benchmark(self):
         data_storage = self.construct_data_storage()
@@ -172,11 +215,13 @@ if __name__ == "__main__":
     autocommit_frequency = args.autocommit_frequency_ms or None
 
     if args.type == "wordcount":
-        benchmark = WordcountBenchmark(autocommit_frequency)
+        benchmark: Benchmark = WordcountBenchmark(autocommit_frequency)
+    elif args.type == "weighted_wordcount":
+        benchmark = WeightedWordcountBenchmark(autocommit_frequency)
     elif args.type == "pagerank":
-        benchmark = PagerankBenchmark(autocommit_frequency)  # type: ignore
+        benchmark = PagerankBenchmark(autocommit_frequency)
     elif args.type == "increment":
-        benchmark = IncrementBenchmark(autocommit_frequency)  # type: ignore
+        benchmark = IncrementBenchmark(autocommit_frequency)
     else:
         raise RuntimeError("Unknown benchmark type: " + args.type)
 

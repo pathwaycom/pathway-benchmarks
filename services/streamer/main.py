@@ -60,6 +60,8 @@ if __name__ == "__main__":
 
     if args.type == "wordcount":
         dataset_path = args.dataset_path or "./datasets/wordcount-large.csv"
+    elif args.type == "weighted_wordcount":
+        dataset_path = args.dataset_path or "./datasets/weighted-wordcount-large.csv"
     elif args.type == "pagerank":
         dataset_path = args.dataset_path or "./datasets/pagerank.json"
     elif args.type == "increment":

@@ -109,6 +109,11 @@ impl KafkaReader {
                 }
             }
         }
+
+        for i in 0..timeline.len() - 1 {
+            assert!(timeline[i].timestamp <= timeline[i + 1].timestamp);
+        }
+
         timeline
     }
 }

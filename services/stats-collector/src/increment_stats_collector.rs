@@ -175,7 +175,7 @@ fn main() {
             latency_profile[((len - 1) * i) / 10].latency
         );
     }
-    eprintln!("lost{} ", lost_cnt);
+    eprintln!("Lost: {lost_cnt}");
 
     if print_short {
         let mut str_buffer: String = String::new();

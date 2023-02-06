@@ -6,7 +6,9 @@ import time
 def calculate_stats(collector_args):
     start_at = time.time()
 
-    args = "cargo run --bin stats_collector {}".format(collector_args).split()
+    args = "cargo run --bin {}".format(collector_args).split()
+    print("Command to be executed: ", args)
+
     popen = subprocess.Popen(args, stdout=subprocess.PIPE)
     popen.wait()
 
@@ -58,9 +60,13 @@ if __name__ == "__main__":
         benchmark_kind,
     )
 
-    collector_output_type = " --stats_short {} --stats_timeline {} --stats_pathway_ptime_aggregated {}".format(
-        args.stats_short, args.stats_timeline, args.stats_pathway_ptime_aggregated
+    cargo_run_command = "{} {} --stats_short {} --stats_timeline {} --stats_pathway_ptime_aggregated {}".format(
+        args.type + "_stats_collector",
+        instance_name,
+        args.stats_short,
+        args.stats_timeline,
+        args.stats_pathway_ptime_aggregated,
     )
 
     print("Instance name:", instance_name)
-    calculate_stats(instance_name + collector_output_type)
+    calculate_stats(cargo_run_command)
