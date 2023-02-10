@@ -102,9 +102,9 @@ impl KafkaReader {
                         break;
                     }
                     seconds_waiting += 1;
+                    eprintln!("No messages read, retrying...");
                     if seconds_waiting == 10 {
-                        eprintln!("Max waiting time expired, retrying...");
-                        return timeline;
+                        panic!("Failed to read non-empty timeline from the topic");
                     }
                 }
             }

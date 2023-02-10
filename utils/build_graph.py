@@ -3,7 +3,7 @@ import pandas as pd
 
 columns = ["timestamp", "latency"]
 timeline_df = pd.read_csv(
-    "../docker-compose/results/pathway/weighted_wordcount-1675438571.4078279-1-1-100-5-150000-unaware-timeline.txt",
+    "../docker-compose/results/pathway/wordcount-1675986444.044187-1-1-10-5-111111-unaware-timeline.txt",
     names=columns,
     header=None,
 )

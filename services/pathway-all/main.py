@@ -102,7 +102,8 @@ class WordcountBenchmark(Benchmark):
             storage_type="kafka",
             rdkafka_settings=self.get_rdkafka_settings(),
             topics=["test_1"],
-            commit_frequency_in_messages=100000,
+            commit_frequency_in_messages=10000,
+            commit_frequency_ms=100,
         )
         data_format = api.DataFormat(
             format_type="dsv",

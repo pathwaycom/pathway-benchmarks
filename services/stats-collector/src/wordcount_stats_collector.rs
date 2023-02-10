@@ -55,8 +55,12 @@ fn parse_wordcount_output_message(csv: &str) -> Option<WordCountOutputLine> {
 
     let value: Vec<&str> = line.split(',').collect();
 
-    if value[3].eq("-1") {
+    if value.len() == 4 && value[3].eq("-1") {
         return None;
+    }
+
+    if value.len() < 2 {
+        eprintln!("Suspicious value: {value:?}");
     }
 
     let pathway_time: Option<i64> = if value.len() > 2 {
@@ -142,15 +146,19 @@ fn main() {
     let aggregated_timeline_file_name =
         format!("results/{}-aggregated-timeline.txt", &instance_name);
 
-    let kafka_reader: KafkaReader = KafkaReader {
-        client_config: get_default_kafka_config(),
+    let mut timeline_input: Vec<TimeLineEntry<WordCountInputLine>> = {
+        let kafka_reader: KafkaReader = KafkaReader {
+            client_config: get_default_kafka_config(),
+        };
+        kafka_reader.read_from_kafka_topic("test_0", parse_wordcount_input_message)
     };
 
-    let mut timeline_input: Vec<TimeLineEntry<WordCountInputLine>> =
-        kafka_reader.read_from_kafka_topic("test_0", parse_wordcount_input_message);
-
-    let mut timeline_output: Vec<TimeLineEntry<WordCountOutputLine>> =
-        kafka_reader.read_from_kafka_topic("test_1", parse_wordcount_output_message);
+    let mut timeline_output: Vec<TimeLineEntry<WordCountOutputLine>> = {
+        let kafka_reader: KafkaReader = KafkaReader {
+            client_config: get_default_kafka_config(),
+        };
+        kafka_reader.read_from_kafka_topic("test_1", parse_wordcount_output_message)
+    };
 
     timeline_input.sort();
 
@@ -189,7 +197,12 @@ fn main() {
     let mut lost_cnt = 0;
     let mut latency_profile: Vec<LatencyTime> = Vec::new();
     let mut latency_timeline: Vec<TimeLatency> = Vec::new();
+
     for x in &word_count {
+        if time_counts.get(&x.word).is_none() {
+            lost_cnt += 1;
+            continue;
+        }
         let time_counts_x = time_counts.get(&x.word).unwrap();
         let res = time_counts_x.binary_search(&CountAndTime {
             count: x.count,

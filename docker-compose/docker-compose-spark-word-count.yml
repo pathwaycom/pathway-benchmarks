@@ -81,7 +81,6 @@ services:
       resources:
         limits:
           memory: 16G    
-   
     build: ../services/spark-word-count/
     depends_on:
       - spark-master
@@ -93,14 +92,9 @@ services:
       - RATE_PER_SECOND
       - CORES
       - WORKERS
-         
+
   streamer:  
     build: ../services/streamer/
-    deploy:
-      resources:
-        limits:
-          memory: 16G    
-  
     environment:
       - AUTOCOMMIT_FREQUENCY_MS
       - BENCHMARK_TYPE
@@ -113,19 +107,17 @@ services:
         condition: service_started
   stats-collector:
     build: ../services/stats-collector/
-    deploy:
-      resources:
-        limits:
-          memory: 16G    
-   
     environment:
       - AUTOCOMMIT_FREQUENCY_MS
       - BENCHMARK_TYPE
       - COMMIT_FREQUENCY
-      - RATE_PER_SECOND
       - ENGINE_TYPE
+      - RATE_PER_SECOND
       - CORES
       - WORKERS
+      - STATS_SHORT
+      - STATS_TIMELINE
+      - STATS_PATHWAY_PTIME_AGGREGATED
     depends_on:
       streamer:
         condition: service_completed_successfully

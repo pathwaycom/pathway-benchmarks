@@ -24,6 +24,8 @@ services:
       KAFKA_LOG_CLEANER_MIN_COMPACTION_LAG_MS: 1000000000
       KAFKA_LOG_SEGMENT_MS: 10000
       KAFKA_MIN_CLEANABLE_DIRTY_RATIO: 1
+      KAFKA_FETCH_MAX_WAIT_MS: 10
+      KAFKA_METADATA_MAX_AGE_MS: 10
     healthcheck:
       test: [ "CMD", "nc", "-vz", "localhost", "9092" ]
       interval: 10s
@@ -36,8 +38,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 32G    
-  
+          memory: 32G
     cap_add: 
       - SYS_PTRACE
     environment:
@@ -77,7 +78,7 @@ services:
       - CORES
       - WORKERS
       - STATS_SHORT
-      - STATS_TIMELINE 
+      - STATS_TIMELINE
       - STATS_PATHWAY_PTIME_AGGREGATED
     depends_on:
       streamer:
