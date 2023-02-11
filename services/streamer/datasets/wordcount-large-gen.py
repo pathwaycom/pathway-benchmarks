@@ -1,6 +1,8 @@
 import json
 import random
 
+random.seed(1)
+
 WORD_SIZE = 7
 DICTIONARY_SIZE = 10000
 TEXT_SIZE = 10000000
