@@ -2,17 +2,20 @@ version: "3.8"
 services:
   zookeeper:
     image: wurstmeister/zookeeper
-    deploy:
-      resources:
-        limits:
-          memory: 64G    
+    ports:
+      - 2181:2181
+    healthcheck:
+      test: [ "CMD", "nc", "-vz", "localhost", "2181" ]
+      interval: 10s
+      timeout: 10s
+      retries: 100
   kafka:
     image: wurstmeister/kafka
     ports:
       - "${KAFKA_PORT}:9092"
     depends_on:
       zookeeper:
-        condition: service_started
+        condition: service_healthy
     environment:
       DOCKER_API_VERSION: 1.22
       HOSTNAME_COMMAND: "route -n | awk '/UG[ \t]/{print $$2}'"

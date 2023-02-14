@@ -4,18 +4,31 @@ import sys
 from typing import Dict
 
 
-def read_timeline(path, shrink_first_lines, percentiles):
+def read_timeline(path, shrink_first_lines, shrink_first_milliseconds, percentiles):
     n_rows_read = 0
+    first_timestamp_ms = None
     timestamps = []
     with open(path, "r") as f:
         for row in f:
+            tokens = [int(x) for x in row.strip().split(",")]
+            if len(tokens) != 2:
+                continue
+
+            if first_timestamp_ms is None:
+                first_timestamp_ms = tokens[0]
             n_rows_read += 1
             if n_rows_read < shrink_first_lines:
                 continue
-            tokens = row.strip().split(",")
-            if len(tokens) != 2:
+            if tokens[0] - first_timestamp_ms < shrink_first_milliseconds:
                 continue
             timestamps.append(int(tokens[1]))
+
+    print(
+        "Path: {}, timestamps remained after filtering: {}".format(
+            path, len(timestamps)
+        )
+    )
+
     timestamps.sort()
     timestamp_results = []
     for p in percentiles:
@@ -36,6 +49,7 @@ if __name__ == "__main__":
     parser.add_argument("--max-timestamp", type=int, default=sys.maxsize)
     parser.add_argument("--buckets", type=str)
     parser.add_argument("--shrink-first-lines", type=int, default=1000000)
+    parser.add_argument("--shrink-first-milliseconds", type=int, default=2000)
     parser.add_argument(
         "--percentiles-for-plot", type=str, default="50,75,85,95,99,99.5"
     )
@@ -81,7 +95,10 @@ if __name__ == "__main__":
 
     for rate_per_second, log_file_path in logfile_per_timestamp.items():
         percentile_values = read_timeline(
-            log_file_path, args.shrink_first_lines, percentiles
+            log_file_path,
+            args.shrink_first_lines,
+            args.shrink_first_milliseconds,
+            percentiles,
         )
         log_lines.append(
             ",".join([str(x) for x in [rate_per_second] + percentile_values])
@@ -90,7 +107,5 @@ if __name__ == "__main__":
     log_lines.sort(key=lambda x: int(x.split(",")[0]))
 
     header = "rate_per_second," + ",".join(["p{}".format(x) for x in percentiles])
-    csv_contents = header + "\n".join(log_lines)
-
-    print(header)
-    print()
+    csv_contents = header + "\n" + "\n".join(log_lines)
+    print(csv_contents)
