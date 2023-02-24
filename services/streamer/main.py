@@ -1,5 +1,6 @@
 import argparse
 import subprocess
+import sys
 import time
 
 PREPARED_DATASET_PATH = ".dataset-tmp"
@@ -36,17 +37,20 @@ class BenchmarkStreamer:
         time.sleep(90)
 
     def run_streaming(self):
+        print("streamer starting", file=sys.stderr)
         self.prepare_dataset_with_commits()
 
         self.wait_for_engine_to_start()
+        print("streamer done waiting", file=sys.stderr)
         start_at = time.time()
-        args = "cargo run -- {} {}".format(
+        args = "target/release/streamer {} {}".format(
             PREPARED_DATASET_PATH, self._rate_per_second
         ).split()
+        print("running ", args, file=sys.stderr)
         popen = subprocess.Popen(args, stdout=subprocess.PIPE)
         popen.wait()
         finish_at = time.time()
-        print("Time spent on streaming:", finish_at - start_at)
+        print("Time spent on streaming:", finish_at - start_at, file=sys.stderr)
 
 
 if __name__ == "__main__":

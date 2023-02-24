@@ -1,7 +1,7 @@
 use rand::Rng;
 use std::str::from_utf8;
 
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use rdkafka::consumer::{BaseConsumer, Consumer, DefaultConsumerContext};
 use rdkafka::message::BorrowedMessage;
@@ -86,6 +86,7 @@ impl KafkaReader {
         let consumer = self.get_topic_consumer(topic_name);
         let mut timeline: Vec<TimeLineEntry<K>> = Vec::new();
         let mut seconds_waiting = 0;
+        let read_start = Instant::now();
         while timeline.is_empty() {
             loop {
                 let message = consumer.poll(Duration::from_secs(1));
@@ -109,6 +110,8 @@ impl KafkaReader {
                 }
             }
         }
+        let read_duration = read_start.elapsed();
+        eprintln!("Time to read from Kafka {:?}", read_duration);
 
         for i in 0..timeline.len() - 1 {
             assert!(timeline[i].timestamp <= timeline[i + 1].timestamp);

@@ -14,7 +14,7 @@ RUN bash rust-installer.sh -y
 COPY ./src /streamer/src
 COPY ./Cargo.lock /streamer/Cargo.lock
 COPY ./Cargo.toml /streamer/Cargo.toml
-RUN cargo build
+RUN cargo build --release
 
 COPY ./main.py /streamer/main.py
 COPY ./datasets /streamer/datasets

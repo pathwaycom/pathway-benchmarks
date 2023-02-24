@@ -65,6 +65,8 @@ fn main() {
             if time_expected > time_passed {
                 eprintln!("Need to sleep for {:?} more", time_expected - time_passed);
                 sleep(time_expected - time_passed);
+            } else {
+                eprint!(".")
             }
         }
     }

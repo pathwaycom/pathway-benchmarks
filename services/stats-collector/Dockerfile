@@ -14,7 +14,7 @@ RUN bash rust-installer.sh -y
 COPY ./src /stats-collector/src
 COPY ./Cargo.lock /stats-collector/Cargo.lock
 COPY ./Cargo.toml /stats-collector/Cargo.toml
-RUN cargo build
+RUN cargo build --release
 
 COPY ./main.py /stats-collector/main.py
 

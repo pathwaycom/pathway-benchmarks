@@ -83,7 +83,7 @@ class WordcountBenchmark(Benchmark):
         data_format = api.DataFormat(
             format_type="jsonlines",
             key_field_names=None,
-            value_fields=_form_value_fields(None, ["word"]),
+            value_fields=_form_value_fields(None, ["word"], None),
         )
         words = table_from_datasource(
             datasource.GenericDataSource(
@@ -108,7 +108,7 @@ class WordcountBenchmark(Benchmark):
         data_format = api.DataFormat(
             format_type="dsv",
             key_field_names=[],
-            value_fields=_form_value_fields([], ["word", "count"]),
+            value_fields=_form_value_fields([], ["word", "count"], None),
             delimiter=",",
         )
         result.to(
@@ -127,7 +127,7 @@ class WeightedWordcountBenchmark(Benchmark):
         data_format = api.DataFormat(
             format_type="jsonlines",
             key_field_names=None,
-            value_fields=_form_value_fields(None, ["word", "weight"]),
+            value_fields=_form_value_fields(None, ["word", "weight"], None),
         )
         words = table_from_datasource(
             datasource.GenericDataSource(

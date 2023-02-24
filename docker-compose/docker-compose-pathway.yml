@@ -26,6 +26,7 @@ services:
       KAFKA_LOG_RETENTION_BYTES: -1
       KAFKA_LOG_CLEANER_MIN_COMPACTION_LAG_MS: 1000000000
       KAFKA_LOG_SEGMENT_MS: 10000
+      KAFKA_LOG_MESSAGE_TIMESTAMP_TYPE: LogAppendTime
       KAFKA_MIN_CLEANABLE_DIRTY_RATIO: 1
       KAFKA_FETCH_MAX_WAIT_MS: 10
       KAFKA_METADATA_MAX_AGE_MS: 10
@@ -36,26 +37,6 @@ services:
       retries: 10
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-  pathway-all:
-    build: ../services/pathway-all/
-    deploy:
-      resources:
-        limits:
-          memory: 32G
-    cap_add: 
-      - SYS_PTRACE
-    environment:
-      - AUTOCOMMIT_FREQUENCY_MS
-      - BENCHMARK_TYPE
-      - COMMIT_FREQUENCY
-      - RATE_PER_SECOND
-      - CORES
-      - WORKERS
-    depends_on:
-      kafka:
-        condition: service_healthy
-    volumes:
-      - "./results:/pathway-all/results"
   streamer:
     build: ../services/streamer/
     environment:
@@ -67,9 +48,9 @@ services:
       kafka:
         condition: service_healthy
       pathway-all:
-        condition: service_started  
+        condition: service_started
   stats-collector:
-    build: 
+    build:
       context: ../services/stats-collector/
       dockerfile: Dockerfile
     environment:
@@ -88,3 +69,47 @@ services:
         condition: service_completed_successfully
     volumes:
       - "./results:/stats-collector/results"
+
+  pathway-all:
+    build: ../services/pathway-all/
+    deploy:
+      resources:
+        limits:
+          memory: 32G
+    cap_add:
+      - SYS_PTRACE
+    environment:
+      - AUTOCOMMIT_FREQUENCY_MS
+      - BENCHMARK_TYPE
+      - COMMIT_FREQUENCY
+      - RATE_PER_SECOND
+      - CORES
+      - WORKERS
+    depends_on:
+      kafka:
+        condition: service_healthy
+    volumes:
+      - "./results:/pathway-all/results"
+
+  kafka-io-record:
+    links:
+      - flink-wordcount-taskmanager
+    build:
+      context: ../services/stats-collector/
+      dockerfile: Dockerfile-kafka_io_record
+    environment:
+      - AUTOCOMMIT_FREQUENCY_MS
+      - BENCHMARK_TYPE
+      - COMMIT_FREQUENCY
+      - ENGINE_TYPE
+      - RATE_PER_SECOND
+      - CORES
+      - WORKERS
+      - STATS_SHORT
+      - STATS_TIMELINE
+      - STATS_PATHWAY_PTIME_AGGREGATED
+    depends_on:
+      streamer:
+        condition: service_completed_successfully
+    volumes:
+      - "./results:/kafka_io_record/results"

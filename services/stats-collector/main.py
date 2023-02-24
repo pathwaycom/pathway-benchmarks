@@ -1,19 +1,20 @@
 import argparse
 import subprocess
+import sys
 import time
 
 
 def calculate_stats(collector_args):
     start_at = time.time()
 
-    args = "cargo run --bin {}".format(collector_args).split()
-    print("Command to be executed: ", args)
+    args = "target/release/{}".format(collector_args).split()
+    print("Command to be executed: ", args, file=sys.stderr)
 
     popen = subprocess.Popen(args, stdout=subprocess.PIPE)
     popen.wait()
 
     finish_at = time.time()
-    print("Time spent on stats:", finish_at - start_at)
+    print("Time spent on stats:", finish_at - start_at, file=sys.stderr)
 
 
 def wait_for_engine_finish():
@@ -41,6 +42,7 @@ if __name__ == "__main__":
     parser.add_argument("--stats_pathway_ptime_aggregated", type=int, default=1)
     args = parser.parse_args()
 
+    print("Stats-collector waiting", file=sys.stderr)
     wait_for_engine_finish()
 
     if not args.autocommit_frequency_ms:
