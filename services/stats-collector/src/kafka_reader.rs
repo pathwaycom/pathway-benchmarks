@@ -20,6 +20,7 @@ pub fn get_default_kafka_config() -> ClientConfig {
         .set("enable.partition.eof", "false")
         .set("session.timeout.ms", "60000")
         .set("enable.auto.commit", "true")
+        .set("queued.min.messages", "3000000")
         .set("auto.offset.reset", "earliest");
     client_config
 }

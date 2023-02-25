@@ -31,7 +31,7 @@ fn parse_increment_input_message(json: &str) -> Option<IncrementInputLine> {
 
 fn is_pathway_increment_header(line: String) -> bool {
     let items: Vec<&str> = line.split(',').collect();
-    items[0].eq("number")
+    items[0].eq("increased_number")
 }
 
 fn parse_increment_output_message(value: &str) -> Option<IncrementOutputLine> {

@@ -167,23 +167,19 @@ class WeightedWordcountBenchmark(Benchmark):
 
 class IncrementBenchmark(Benchmark):
     def run_benchmark(self):
-        data_storage = self.construct_data_storage()
-        data_format = api.DataFormat(
-            format_type="jsonlines",
-            key_field_names=None,
-            value_fields=_form_value_fields(None, ["number"]),
-        )
-
-        numbers = table_from_datasource(
-            datasource.GenericDataSource(
-                data_storage,
-                data_format,
-                self._autocommit_frequency_ms,
-            )
+        numbers = pw.kafka.read(
+            rdkafka_settings=self.get_rdkafka_settings(),
+            topic_names=["test_0"],
+            format="json",
+            value_columns=["number"],
+            types={
+                "number": pw.Type.INT,
+            },
+            autocommit_duration_ms=self._autocommit_frequency_ms,
         )
 
         result = numbers.select(number=pw.this.number).select(
-            increased_number=pw.cast(int, pw.this.number) + 1
+            increased_number=pw.this.number + 1
         )
 
         data_storage = api.DataStorage(
@@ -195,7 +191,7 @@ class IncrementBenchmark(Benchmark):
         data_format = api.DataFormat(
             format_type="dsv",
             key_field_names=[],
-            value_fields=_form_value_fields([], ["number"]),
+            value_fields=_form_value_fields([], ["increased_number"]),
             delimiter=",",
         )
         result.to(
