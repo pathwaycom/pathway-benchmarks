@@ -21,6 +21,7 @@ class Benchmark:
             "enable.partition.eof": "false",
             "session.timeout.ms": "60000",
             "enable.auto.commit": "true",
+            "queued.min.messages": "3000000",
         }
 
     def construct_data_storage(self):
