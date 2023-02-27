@@ -1,6 +1,7 @@
 version: "3.8"
 services:
   zookeeper:
+    cpuset: $HARNESS_CPU_SET
     image: wurstmeister/zookeeper
     ports:
       - 2181:2181
@@ -9,7 +10,15 @@ services:
       interval: 10s
       timeout: 10s
       retries: 100
+    ports:
+      - 2181:2181
+    healthcheck:
+      test: [ "CMD", "nc", "-vz", "localhost", "2181" ]
+      interval: 10s
+      timeout: 10s
+      retries: 100
   kafka:
+    cpuset: $HARNESS_CPU_SET
     image: wurstmeister/kafka
     ports:
       - "${KAFKA_PORT}:9092"
@@ -38,6 +47,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
   streamer:
+    cpuset: $HARNESS_CPU_SET
     build: ../services/streamer/
     environment:
       - AUTOCOMMIT_FREQUENCY_MS
@@ -53,6 +63,7 @@ services:
         condition: service_started
 
   stats-collector:
+    cpuset: $HARNESS_CPU_SET
     build:
       context: ../services/stats-collector/
       dockerfile: Dockerfile
@@ -74,6 +85,7 @@ services:
       - "./results:/stats-collector/results"
 
   flink-wordcount-taskmanager:
+    cpuset: $TESTED_CPU_SET
     build: ../services/flink-word-count-scala
     command: taskmanager --job-classname App --commit_interval ${AUTOCOMMIT_FREQUENCY_MS}
     depends_on:
@@ -97,6 +109,7 @@ services:
         parallelism.default: 1
 
   flink-wordcount-worker:
+    cpuset: $TESTED_CPU_SET
     build: ../services/flink-word-count-scala
     command: standalone-job --job-classname App --commit_interval ${AUTOCOMMIT_FREQUENCY_MS}
     depends_on:
@@ -121,26 +134,3 @@ services:
         taskmanager.rpc.address: flink-wordcount-taskmanager
         jobmanager.rpc.address: flink-wordcount-worker
         parallelism.default: 1
-
-  kafka-io-record:
-    links:
-      - flink-wordcount-taskmanager
-    build:
-      context: ../services/stats-collector/
-      dockerfile: Dockerfile-kafka_io_record
-    environment:
-      - AUTOCOMMIT_FREQUENCY_MS
-      - BENCHMARK_TYPE
-      - COMMIT_FREQUENCY
-      - ENGINE_TYPE
-      - RATE_PER_SECOND
-      - CORES
-      - WORKERS
-      - STATS_SHORT
-      - STATS_TIMELINE
-      - STATS_PATHWAY_PTIME_AGGREGATED
-    depends_on:
-      streamer:
-        condition: service_completed_successfully
-    volumes:
-      - "./results:/kafka_io_record/results"

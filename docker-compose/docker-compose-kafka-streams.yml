@@ -1,8 +1,10 @@
 version: "3.8"
 services:
   zookeeper:
+    cpuset: $HARNESS_CPU_SET
     image: wurstmeister/zookeeper
   kafka:
+    cpuset: $HARNESS_CPU_SET
     image: wurstmeister/kafka
     ports:
       - "${KAFKA_PORT}:9092"
@@ -28,6 +30,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
   streamer:
+    cpuset: $HARNESS_CPU_SET
     build: ../services/streamer/
     environment:
       - AUTOCOMMIT_FREQUENCY_MS
@@ -40,19 +43,28 @@ services:
       kafka-streams-benchmark:
         condition: service_started
   stats-collector:
-    build: ../services/stats-collector/
+    cpuset: $HARNESS_CPU_SET
+    build:
+      context: ../services/stats-collector/
+      dockerfile: Dockerfile
     environment:
       - AUTOCOMMIT_FREQUENCY_MS
       - BENCHMARK_TYPE
       - COMMIT_FREQUENCY
       - ENGINE_TYPE
       - RATE_PER_SECOND
+      - CORES
+      - WORKERS
+      - STATS_SHORT
+      - STATS_TIMELINE
+      - STATS_PATHWAY_PTIME_AGGREGATED
     depends_on:
       streamer:
         condition: service_completed_successfully
     volumes:
       - "./results:/stats-collector/results"
   kafka-streams-benchmark:
+    cpuset: $TESTED_CPU_SET
     build: ../services/kafka-streams
     depends_on:
       kafka:

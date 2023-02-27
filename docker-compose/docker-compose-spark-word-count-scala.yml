@@ -1,19 +1,12 @@
 version: "3.8"
 services:
   zookeeper:
+    cpuset: $HARNESS_CPU_SET
     image: wurstmeister/zookeeper
-    deploy:
-      resources:
-        limits:
-          memory: 64G    
-
+  
   kafka:
+    cpuset: $HARNESS_CPU_SET
     image: wurstmeister/kafka
-    deploy:
-      resources:
-        limits:
-          memory: 8G    
-   
     ports:
       - "${KAFKA_PORT}:9092"
     depends_on:
@@ -38,6 +31,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
   spark-master:  
+    cpuset: $TESTED_CPU_SET
     build: ../services/spark-cluster/
     deploy:
       resources:
@@ -54,6 +48,7 @@ services:
       - SPARK_WORKLOAD=master
   
   spark-worker:    
+    cpuset: $TESTED_CPU_SET
     build: ../services/spark-cluster/
     deploy:
       replicas: ${WORKERS}
@@ -77,11 +72,7 @@ services:
       - SPARK_LOCAL_IP=spark-worker
 
   spark-word-count:
-    deploy:
-      resources:
-        limits:
-          memory: 16G    
-   
+    cpuset: $TESTED_CPU_SET
     build: ../services/spark-word-count-scala/
     depends_on:
       - spark-master
@@ -94,13 +85,9 @@ services:
       - CORES
       - WORKERS
          
-  streamer:  
+  streamer:
+    cpuset: $HARNESS_CPU_SET  
     build: ../services/streamer/
-    deploy:
-      resources:
-        limits:
-          memory: 16G    
-  
     environment:
       - AUTOCOMMIT_FREQUENCY_MS
       - BENCHMARK_TYPE
@@ -112,20 +99,19 @@ services:
       spark-word-count:
         condition: service_started
   stats-collector:
+    cpuset: $HARNESS_CPU_SET
     build: ../services/stats-collector/
-    deploy:
-      resources:
-        limits:
-          memory: 16G    
-   
     environment:
       - AUTOCOMMIT_FREQUENCY_MS
       - BENCHMARK_TYPE
       - COMMIT_FREQUENCY
-      - RATE_PER_SECOND
       - ENGINE_TYPE
+      - RATE_PER_SECOND
       - CORES
       - WORKERS
+      - STATS_SHORT
+      - STATS_TIMELINE
+      - STATS_PATHWAY_PTIME_AGGREGATED
     depends_on:
       streamer:
         condition: service_completed_successfully

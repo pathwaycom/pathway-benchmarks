@@ -1,8 +1,10 @@
 version: "3.8"
 services:
   zookeeper:
+    cpuset: $HARNESS_CPU_SET
     image: wurstmeister/zookeeper
   kafka:
+    cpuset: $HARNESS_CPU_SET
     image: wurstmeister/kafka
     ports:
       - "${KAFKA_PORT}:9092"
@@ -28,6 +30,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
   spark-master:
+    cpuset: $TESTED_CPU_SET
     build: ../services/spark-cluster/
     depends_on:
       - kafka
@@ -39,6 +42,7 @@ services:
       - SPARK_WORKLOAD=master
   
   spark-worker:
+    cpuset: $TESTED_CPU_SET
     build: ../services/spark-cluster/
 
     ports:
@@ -57,6 +61,7 @@ services:
       - SPARK_LOCAL_IP=spark-worker
 
   spark-increment:
+    cpuset: $TESTED_CPU_SET
     build: ../services/spark-increment/
     depends_on:
       - spark-master
@@ -70,6 +75,7 @@ services:
       - WORKERS
 
   streamer:
+    cpuset: $HARNESS_CPU_SET
     build: ../services/streamer/
     environment:
       - AUTOCOMMIT_FREQUENCY_MS
@@ -82,6 +88,7 @@ services:
       spark-increment:
         condition: service_started
   stats-collector:
+    cpuset: $HARNESS_CPU_SET
     build: ../services/stats-collector/
     environment:
       - AUTOCOMMIT_FREQUENCY_MS

@@ -1,6 +1,7 @@
 version: "3.8"
 services:
   zookeeper:
+    cpuset: $HARNESS_CPU_SET
     image: wurstmeister/zookeeper
     ports:
       - 2181:2181
@@ -10,6 +11,7 @@ services:
       timeout: 10s
       retries: 100
   kafka:
+    cpuset: $HARNESS_CPU_SET
     image: wurstmeister/kafka
     ports:
       - "${KAFKA_PORT}:9092"
@@ -27,6 +29,7 @@ services:
       KAFKA_LOG_CLEANER_MIN_COMPACTION_LAG_MS: 1000000000
       KAFKA_LOG_SEGMENT_MS: 10000
       KAFKA_LOG_MESSAGE_TIMESTAMP_TYPE: LogAppendTime
+      KAFKA_LOG_MESSAGE_TIMESTAMP_TYPE: LogAppendTime
       KAFKA_MIN_CLEANABLE_DIRTY_RATIO: 1
       KAFKA_FETCH_MAX_WAIT_MS: 10
       KAFKA_METADATA_MAX_AGE_MS: 10
@@ -38,6 +41,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
   streamer:
+    cpuset: $HARNESS_CPU_SET
     build: ../services/streamer/
     environment:
       - AUTOCOMMIT_FREQUENCY_MS
@@ -50,6 +54,7 @@ services:
       pathway-all:
         condition: service_started
   stats-collector:
+    cpuset: $HARNESS_CPU_SET
     build:
       context: ../services/stats-collector/
       dockerfile: Dockerfile
@@ -71,6 +76,7 @@ services:
       - "./results:/stats-collector/results"
 
   pathway-all:
+    cpuset: $TESTED_CPU_SET
     build: ../services/pathway-all/
     deploy:
       resources:
@@ -90,26 +96,3 @@ services:
         condition: service_healthy
     volumes:
       - "./results:/pathway-all/results"
-
-  kafka-io-record:
-    links:
-      - flink-wordcount-taskmanager
-    build:
-      context: ../services/stats-collector/
-      dockerfile: Dockerfile-kafka_io_record
-    environment:
-      - AUTOCOMMIT_FREQUENCY_MS
-      - BENCHMARK_TYPE
-      - COMMIT_FREQUENCY
-      - ENGINE_TYPE
-      - RATE_PER_SECOND
-      - CORES
-      - WORKERS
-      - STATS_SHORT
-      - STATS_TIMELINE
-      - STATS_PATHWAY_PTIME_AGGREGATED
-    depends_on:
-      streamer:
-        condition: service_completed_successfully
-    volumes:
-      - "./results:/kafka_io_record/results"

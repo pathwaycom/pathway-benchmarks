@@ -1,6 +1,7 @@
 version: "3.8"
 services:
   zookeeper:
+    cpuset: $HARNESS_CPU_SET
     image: wurstmeister/zookeeper
     ports:
       - 2181:2181
@@ -11,6 +12,7 @@ services:
       retries: 100
 
   kafka:
+    cpuset: $HARNESS_CPU_SET
     image: wurstmeister/kafka
     deploy:
       resources:
@@ -41,6 +43,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
   spark-master:  
+    cpuset: $TESTED_CPU_SET
     build: ../services/spark-cluster/
     deploy:
       resources:
@@ -57,6 +60,7 @@ services:
       - SPARK_WORKLOAD=master
   
   spark-worker:    
+    cpuset: $TESTED_CPU_SET
     build: ../services/spark-cluster/
     deploy:
       replicas: ${WORKERS}
@@ -80,10 +84,7 @@ services:
       - SPARK_LOCAL_IP=spark-worker
 
   spark-word-count:
-    deploy:
-      resources:
-        limits:
-          memory: 16G    
+    cpuset: $TESTED_CPU_SET
     build: ../services/spark-word-count/
     depends_on:
       - spark-master
@@ -96,7 +97,8 @@ services:
       - CORES
       - WORKERS
 
-  streamer:  
+  streamer:
+    cpuset: $HARNESS_CPU_SET  
     build: ../services/streamer/
     environment:
       - AUTOCOMMIT_FREQUENCY_MS
@@ -109,6 +111,7 @@ services:
       spark-word-count:
         condition: service_started
   stats-collector:
+    cpuset: $HARNESS_CPU_SET
     build: ../services/stats-collector/
     environment:
       - AUTOCOMMIT_FREQUENCY_MS
