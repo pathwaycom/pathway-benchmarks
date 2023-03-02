@@ -1,6 +1,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>flink-word-count-scala</groupId>
+  <groupId>flink-word-count-scala-minibatch</groupId>
   <artifactId>wcount</artifactId>
   <version>1.0-SNAPSHOT</version>
   <name>flink-word-count</name>
@@ -26,12 +26,49 @@
   </properties>
 
   <dependencies>
+
+    <!-- https://mvnrepository.com/artifact/org.apache.flink/flink-table-api-scala-bridge -->
+
+    <dependency>
+        <groupId>org.apache.flink</groupId>
+        <artifactId>flink-table-api-scala-bridge_2.12</artifactId>
+        <version>1.16.0</version>
+    </dependency>
+
     <dependency>
       <groupId>org.scala-lang</groupId>
       <artifactId>scala-library</artifactId>
       <version>${scala.version}</version>
     </dependency>
+    <!-- https://mvnrepository.com/artifact/org.apache.flink/flink-table-api-java-bridge -->
+    <dependency>
+        <groupId>org.apache.flink</groupId>
+        <artifactId>flink-table-api-java-bridge</artifactId>
+        <version>1.16.0</version>
+        <scope>provided</scope>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/org.apache.flink/flink-table-api-scala -->
+    <dependency>
+        <groupId>org.apache.flink</groupId>
+        <artifactId>flink-table-api-scala_2.12</artifactId>
+        <version>1.16.0</version>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/org.apache.flink/flink-table-api-java -->
+    <dependency>
+        <groupId>org.apache.flink</groupId>
+        <artifactId>flink-table-api-java</artifactId>
+        <version>1.16.0</version>
+    </dependency>
     
+    <!-- https://mvnrepository.com/artifact/org.apache.flink/flink-table -->
+    <dependency>
+        <groupId>org.apache.flink</groupId>
+        <artifactId>flink-table</artifactId>
+        <version>1.16.0</version>
+        <type>pom</type>
+        <scope>provided</scope>
+    </dependency>
     <!-- https://mvnrepository.com/artifact/org.apache.flink/flink-formats -->
     <dependency>
       <groupId>org.apache.flink</groupId>
@@ -72,8 +109,10 @@
       <version>1.16.0</version>
     </dependency>
   </dependencies>
+
   <build>
     <sourceDirectory>src/main/scala</sourceDirectory>
+  
     <plugins>
       <plugin>
         <!-- see http://davidb.github.com/scala-maven-plugin -->

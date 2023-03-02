@@ -60,15 +60,25 @@ fn parse_wordcount_output_message(csv: &str) -> Option<WordCountOutputLine> {
 
     let value: Vec<&str> = line.split(',').collect();
 
-    if value.len() == 4 && value[3].eq("-1") {
+    // handle pathway delta
+    if value.len() == 4 && (value[3].eq("-1")) {
         return None;
     }
+
+    //handle flink delta
+    if value.len() == 3 && value[2].eq("-D") {
+        return None;
+    }
+
+    //TODO: if we get more weird output formats
+    // we should change parsing method depending on stat-collector parameter
+    // now we only have two unusual cases to handle, we can look at length of a row
 
     if value.len() < 2 {
         eprintln!("Suspicious value: {value:?}");
     }
 
-    let pathway_time: Option<i64> = if value.len() > 2 {
+    let pathway_time: Option<i64> = if value.len() == 4 {
         Some(value[2].parse::<i64>().unwrap())
     } else {
         None

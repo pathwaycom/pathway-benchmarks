@@ -26,7 +26,7 @@ services:
 
   flink-wordcount-taskmanager:
     cpuset: $TESTED_CPU_SET
-    build: ../services/flink-word-count-scala
+    build: ../services/flink-word-count-scala-minibatch
     command: taskmanager --job-classname App --commit_interval ${AUTOCOMMIT_FREQUENCY_MS}
     depends_on:
       kafka:
@@ -55,7 +55,7 @@ services:
 
   flink-wordcount-worker:
     cpuset: $TESTED_CPU_SET
-    build: ../services/flink-word-count-scala
+    build: ../services/flink-word-count-scala-minibatch
     command: standalone-job --job-classname App --commit_interval ${AUTOCOMMIT_FREQUENCY_MS}
     depends_on:
       kafka:

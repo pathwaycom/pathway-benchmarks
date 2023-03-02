@@ -5,7 +5,9 @@ import org.apache.flink.connector.kafka.sink.{KafkaRecordSerializationSchema, Ka
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer
 import org.apache.flink.connector.kafka.source.KafkaSource
 import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema
- 
+import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment 
+import org.apache.flink.table.sinks.RetractStreamTableSink
+
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.formats.csv.CsvRowSerializationSchema
 import org.apache.flink.formats.csv.CsvRowSerializationSchema.Builder
@@ -55,11 +57,15 @@ object App
         val env = StreamExecutionEnvironment.getExecutionEnvironment
         // env.setRuntimeMode(RuntimeExecutionMode.BATCH);
         env.setMaxParallelism(1)
+        val tableEnv = StreamTableEnvironment.create(env)
 
-        // var configuration = env.getConfig
-        // configuration.setString("table.exec.mini-batch.enabled", "true")
-        // configuration.setString("table.exec.mini-batch.allow-latency", "20 ms")
-
+        var configuration = tableEnv.getConfig
+        configuration.set("table.exec.mini-batch.enabled", "true")
+        configuration.set("table.exec.mini-batch.allow-latency", s"${pTime} ms")
+        configuration.set("table.exec.mini-batch.size", "5000")
+        configuration.set("table.optimizer.agg-phase-strategy", "TWO_PHASE"); 
+        configuration.set("table.optimizer.incremental-agg-enabled", "true");
+        
 
         // val env = new RemoteStreamEnvironment("flink-wordcount-taskmanager", 3456, config, "wcount-1.0-SNAPSHOT.jar")
         // val env = ExecutionEnvironment.getExecutionEnvironment()
@@ -86,13 +92,17 @@ object App
         .setRecordSerializer(serializer)
         .build()
 
-        val lines = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "Kafka Source")
+        val stream = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "Kafka Source").map(v=>v.getField(0))
+        val table = tableEnv.fromDataStream(stream)
 
-        lines.map(v => (v.getField(0),1))
-        .keyBy(v => v._1)
-        .reduce((u,v) => (u._1, u._2+v._2))
-        .map(line => s"${line._1},${line._2}")
-        .sinkTo(kafkaSink)
+        tableEnv.createTemporaryView("words", table)
+        val resultTable = tableEnv.sqlQuery("select f0, count(*) from words group by f0")
+        val resultStream =  tableEnv.toChangelogStream(resultTable)
+        // resultStream.print()
+        val formattedResultStream = resultStream
+        .map(v => s"${v.getField(0)},${v.getField(1)},${v.getKind().shortString()}")
+        
+        formattedResultStream.sinkTo(kafkaSink)
 
         env.execute("wordcount pass")
     }
