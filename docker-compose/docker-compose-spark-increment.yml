@@ -1,34 +1,29 @@
 version: "3.8"
+
 services:
   zookeeper:
-    cpuset: $HARNESS_CPU_SET
-    image: wurstmeister/zookeeper
+    extends:
+      file: common-services.yml
+      service: zookeeper-common
   kafka:
-    cpuset: $HARNESS_CPU_SET
-    image: wurstmeister/kafka
-    ports:
-      - "${KAFKA_PORT}:9092"
+    extends:  
+      file: common-services.yml
+      service: kafka-common
+  streamer:
+    extends:
+      file: common-services.yml
+      service: streamer-common
+    
     depends_on:
-      zookeeper:
+      spark-increment:
         condition: service_started
-    environment:
-      DOCKER_API_VERSION: 1.22
-      HOSTNAME_COMMAND: "route -n | awk '/UG[ \t]/{print $$2}'"
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_CREATE_TOPICS: "test_0:1:1:delete,test_1:1:1:delete"
-      KAFKA_DELETE_TOPIC_ENABLE: "true"
-      KAFKA_LOG_RETENTION_HOURS: -1
-      KAFKA_LOG_RETENTION_BYTES: -1
-      KAFKA_LOG_CLEANER_MIN_COMPACTION_LAG_MS: 1000000000
-      KAFKA_LOG_SEGMENT_MS: 10000
-      KAFKA_MIN_CLEANABLE_DIRTY_RATIO: 1
-    healthcheck:
-      test: [ "CMD", "nc", "-vz", "localhost", "9092" ]
-      interval: 10s
-      timeout: 10s
-      retries: 10
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      
+  stats-collector:
+    extends:
+      file: common-services.yml
+      service: stats-collector-common
+
+
   spark-master:
     cpuset: $TESTED_CPU_SET
     build: ../services/spark-cluster/
@@ -74,32 +69,3 @@ services:
       - CORES
       - WORKERS
 
-  streamer:
-    cpuset: $HARNESS_CPU_SET
-    build: ../services/streamer/
-    environment:
-      - AUTOCOMMIT_FREQUENCY_MS
-      - BENCHMARK_TYPE
-      - COMMIT_FREQUENCY
-      - RATE_PER_SECOND
-    depends_on:
-      kafka:
-        condition: service_healthy
-      spark-increment:
-        condition: service_started
-  stats-collector:
-    cpuset: $HARNESS_CPU_SET
-    build: ../services/stats-collector/
-    environment:
-      - AUTOCOMMIT_FREQUENCY_MS
-      - BENCHMARK_TYPE
-      - COMMIT_FREQUENCY
-      - RATE_PER_SECOND
-      - ENGINE_TYPE
-      - CORES
-      - WORKERS
-    depends_on:
-      streamer:
-        condition: service_completed_successfully
-    volumes:
-      - "./results:/stats-collector/results"

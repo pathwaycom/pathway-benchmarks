@@ -1,0 +1,80 @@
+services:
+  zookeeper-common:
+    cpuset: $HARNESS_CPU_SET
+    image: wurstmeister/zookeeper
+    ports:
+      - 2181:2181
+    healthcheck:
+      test: [ "CMD", "nc", "-vz", "localhost", "2181" ]
+      interval: 10s
+      timeout: 10s
+      retries: 100
+    ports:
+      - 2181:2181
+    healthcheck:
+      test: [ "CMD", "nc", "-vz", "localhost", "2181" ]
+      interval: 10s
+      timeout: 10s
+      retries: 100
+  kafka-common:
+    cpuset: $HARNESS_CPU_SET
+    image: wurstmeister/kafka
+    ports:
+      - "${KAFKA_PORT}:9092"
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    environment:
+      DOCKER_API_VERSION: 1.22
+      HOSTNAME_COMMAND: "route -n | awk '/UG[ \t]/{print $$2}'"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CREATE_TOPICS: "test_0:1:1:delete,test_1:1:1:delete"
+      KAFKA_DELETE_TOPIC_ENABLE: "true"
+      KAFKA_LOG_RETENTION_HOURS: -1
+      KAFKA_LOG_RETENTION_BYTES: -1
+      KAFKA_LOG_CLEANER_MIN_COMPACTION_LAG_MS: 1000000000
+      KAFKA_LOG_SEGMENT_MS: 10000
+      KAFKA_LOG_MESSAGE_TIMESTAMP_TYPE: LogAppendTime
+      KAFKA_MIN_CLEANABLE_DIRTY_RATIO: 1
+      KAFKA_FETCH_MAX_WAIT_MS: 10
+      KAFKA_METADATA_MAX_AGE_MS: 10
+    healthcheck:
+      test: [ "CMD", "nc", "-vz", "localhost", "9092" ]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+  streamer-common:
+    cpuset: $HARNESS_CPU_SET
+    build: ../services/streamer/
+    environment:
+      - AUTOCOMMIT_FREQUENCY_MS
+      - BENCHMARK_TYPE
+      - COMMIT_FREQUENCY
+      - RATE_PER_SECOND
+    depends_on:
+      kafka:
+        condition: service_healthy
+        
+  stats-collector-common:
+    cpuset: $HARNESS_CPU_SET
+    build:
+      context: ../services/stats-collector/
+      dockerfile: Dockerfile
+    environment:
+      - AUTOCOMMIT_FREQUENCY_MS
+      - BENCHMARK_TYPE
+      - COMMIT_FREQUENCY
+      - ENGINE_TYPE
+      - RATE_PER_SECOND
+      - CORES
+      - WORKERS
+      - STATS_SHORT
+      - STATS_TIMELINE
+      - STATS_PATHWAY_PTIME_AGGREGATED
+    depends_on:
+      streamer:
+        condition: service_completed_successfully
+    volumes:
+      - "./results:/stats-collector/results"
