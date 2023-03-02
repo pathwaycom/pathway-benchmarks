@@ -2,6 +2,8 @@ FROM python:3.10
 # FROM pathway-debug
 WORKDIR /pathway-all
 
+ENV USING_BENCHMARK_HARNESS=1
+
 COPY ./requirements.txt /pathway-all/requirements.txt
 # ENV PATHWAY_PROFILE=dev
 # ENV RUST_BACKTRACE=1

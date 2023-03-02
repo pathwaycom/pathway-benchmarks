@@ -1,4 +1,5 @@
 import argparse
+import os
 
 import pathway as pw
 from pathway.internals import api, datasink, datasource, parse_graph
@@ -15,9 +16,11 @@ class Benchmark:
         self._autocommit_frequency_ms = autocommit_frequency_ms
 
     def get_rdkafka_settings(self):
+        using_benchmark_harness = os.environ.get("USING_BENCHMARK_HARNESS") == "1"
+        bootstrap_server = "kafka:9092" if using_benchmark_harness else "localhost:9092"
         return {
             "group.id": "$GROUP_NAME",
-            "bootstrap.servers": "kafka:9092",
+            "bootstrap.servers": bootstrap_server,
             "enable.partition.eof": "false",
             "session.timeout.ms": "60000",
             "enable.auto.commit": "true",

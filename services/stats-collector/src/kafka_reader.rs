@@ -1,4 +1,5 @@
 use rand::Rng;
+use std::env;
 use std::str::from_utf8;
 
 use std::time::{Duration, Instant};
@@ -16,12 +17,18 @@ pub fn get_default_kafka_config() -> ClientConfig {
     let mut client_config = ClientConfig::new();
     client_config
         .set("group.id", group_id.to_string())
-        .set("bootstrap.servers", "kafka:9092")
         .set("enable.partition.eof", "false")
         .set("session.timeout.ms", "60000")
         .set("enable.auto.commit", "true")
         .set("queued.min.messages", "3000000")
         .set("auto.offset.reset", "earliest");
+
+    if env::var("USING_BENCHMARK_HARNESS").unwrap_or("0".to_string()) == "1" {
+        client_config.set("bootstrap.servers", "kafka:9092");
+    } else {
+        client_config.set("bootstrap.servers", "localhost:9092");
+    }
+
     client_config
 }
 
@@ -112,7 +119,7 @@ impl KafkaReader {
             }
         }
         let read_duration = read_start.elapsed();
-        eprintln!("Time to read from Kafka {:?}", read_duration);
+        eprintln!("Time to read from Kafka {read_duration:?}");
 
         for i in 0..timeline.len() - 1 {
             assert!(timeline[i].timestamp <= timeline[i + 1].timestamp);

@@ -17,8 +17,13 @@ struct WordCountInputLine {
 }
 
 fn parse_wordcount_input_message(json: &str) -> Option<WordCountInputLine> {
-    let ret: WordCountInputLine = serde_json::from_str(json).expect("JSON was not well-formatted");
-    Some(ret)
+    if json == "*FINISH*" || json == "*COMMIT*" {
+        None
+    } else {
+        let ret: WordCountInputLine = serde_json::from_str(json)
+            .unwrap_or_else(|_| panic!("JSON was not well-formatted: {json}"));
+        Some(ret)
+    }
 }
 
 #[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]

@@ -2,7 +2,8 @@ FROM python:3.10
 
 ENV RUSTUP_HOME=/usr/local/rustup \
     CARGO_HOME=/usr/local/cargo \
-    PATH=/usr/local/cargo/bin:$PATH
+    PATH=/usr/local/cargo/bin:$PATH \
+    USING_BENCHMARK_HARNESS=1
 
 RUN apt-get update
 WORKDIR /streamer

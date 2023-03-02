@@ -22,7 +22,11 @@ fn main() {
 
     let mut client_config = ClientConfig::new();
     client_config.set("group.id", "$GROUP_NAME");
-    client_config.set("bootstrap.servers", "kafka:9092");
+    if env::var("USING_BENCHMARK_HARNESS").unwrap_or("0".to_string()) == "1" {
+        client_config.set("bootstrap.servers", "kafka:9092");
+    } else {
+        client_config.set("bootstrap.servers", "localhost:9092");
+    }
     client_config.set("enable.partition.eof", "false");
     client_config.set("session.timeout.ms", "60000");
     client_config.set("enable.auto.commit", "true");
