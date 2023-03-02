@@ -9,5 +9,5 @@ if __name__ == "__main__":
                 continue
             tokens = row.strip().split("\t")
             assert len(tokens) == 3
-            result = {"id": tokens[0], "u": tokens[1], "v": tokens[2]}
+            result = {"u": int(tokens[1]), "v": int(tokens[2])}
             fw.write(json.dumps(result) + "\n")

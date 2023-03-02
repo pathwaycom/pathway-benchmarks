@@ -43,8 +43,8 @@ class PagerankBenchmark(Benchmark):
         data_storage = self.construct_data_storage()
         data_format = api.DataFormat(
             format_type="jsonlines",
-            key_field_names=["id"],
-            value_fields=_form_value_fields(["id"], ["u", "v"]),
+            key_field_names=None,
+            value_fields=_form_value_fields(None, ["u", "v"], None),
         )
         edges_getter = table_from_datasource(
             datasource.GenericDataSource(
@@ -67,7 +67,7 @@ class PagerankBenchmark(Benchmark):
         data_format = api.DataFormat(
             format_type="dsv",
             key_field_names=[],
-            value_fields=_form_value_fields([], ["rank"]),
+            value_fields=_form_value_fields([], ["rank"], None),
             delimiter=",",
         )
         result.to(
