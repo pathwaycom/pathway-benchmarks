@@ -1,5 +1,6 @@
 import argparse
 import os
+import time
 
 import pathway as pw
 from pathway.internals import api, datasink, datasource, parse_graph
@@ -12,8 +13,10 @@ KAFKA_PORT = 8192
 
 
 class Benchmark:
-    def __init__(self, autocommit_frequency_ms):
+    def __init__(self, autocommit_frequency_ms, channel, input_filename):
         self._autocommit_frequency_ms = autocommit_frequency_ms
+        self._channel = channel
+        self._input_filename = input_filename
 
     def get_rdkafka_settings(self):
         using_benchmark_harness = os.environ.get("USING_BENCHMARK_HARNESS") == "1"
@@ -27,12 +30,31 @@ class Benchmark:
             "queued.min.messages": "3000000",
         }
 
-    def construct_data_storage(self):
-        return api.DataStorage(
-            storage_type="kafka",
-            rdkafka_settings=self.get_rdkafka_settings(),
-            topics=["test_0"],
-        )
+    def construct_input_data_storage(self):
+        if self._channel == "kafka":
+            return api.DataStorage(
+                storage_type="kafka",
+                rdkafka_settings=self.get_rdkafka_settings(),
+                topics=["test_0"],
+            )
+        elif self._channel == "fs":
+            return api.DataStorage(
+                storage_type="fs", path=self._input_filename, poll_new_objects=False
+            )
+        else:
+            raise RuntimeError("Unknown data channel: {}".format(self._channel))
+
+    def construct_output_data_storage(self):
+        if self._channel == "kafka":
+            return api.DataStorage(
+                storage_type="kafka",
+                rdkafka_settings=self.get_rdkafka_settings(),
+                topics=["test_1"],
+            )
+        elif self._channel == "fs":
+            return api.DataStorage(storage_type="fs", path="output.txt")
+        else:
+            raise RuntimeError("Unknown data channel: {}".format(self._channel))
 
     def run_benchmark(self):
         raise NotImplementedError("You need to implement calculations for benchmark")
@@ -40,7 +62,7 @@ class Benchmark:
 
 class PagerankBenchmark(Benchmark):
     def run_benchmark(self):
-        data_storage = self.construct_data_storage()
+        data_storage = self.construct_input_data_storage()
         data_format = api.DataFormat(
             format_type="jsonlines",
             key_field_names=None,
@@ -59,11 +81,7 @@ class PagerankBenchmark(Benchmark):
         )
         result = pagerank(edges, 5)
 
-        data_storage = api.DataStorage(
-            storage_type="kafka",
-            rdkafka_settings=self.get_rdkafka_settings(),
-            topics=["test_1"],
-        )
+        data_storage = self.construct_output_data_storage()
         data_format = api.DataFormat(
             format_type="dsv",
             key_field_names=[],
@@ -82,7 +100,7 @@ class PagerankBenchmark(Benchmark):
 
 class WordcountBenchmark(Benchmark):
     def run_benchmark(self):
-        data_storage = self.construct_data_storage()
+        data_storage = self.construct_input_data_storage()
         data_format = api.DataFormat(
             format_type="jsonlines",
             key_field_names=None,
@@ -101,11 +119,7 @@ class WordcountBenchmark(Benchmark):
             count=pw.reducers.count(),
         )
 
-        data_storage = api.DataStorage(
-            storage_type="kafka",
-            rdkafka_settings=self.get_rdkafka_settings(),
-            topics=["test_1"],
-        )
+        data_storage = self.construct_output_data_storage()
         data_format = api.DataFormat(
             format_type="dsv",
             key_field_names=[],
@@ -124,7 +138,7 @@ class WordcountBenchmark(Benchmark):
 
 class WeightedWordcountBenchmark(Benchmark):
     def run_benchmark(self):
-        data_storage = self.construct_data_storage()
+        data_storage = self.construct_input_data_storage()
         data_format = api.DataFormat(
             format_type="jsonlines",
             key_field_names=None,
@@ -143,11 +157,7 @@ class WeightedWordcountBenchmark(Benchmark):
             count=pw.reducers.sum(words.weight),
         )
 
-        data_storage = api.DataStorage(
-            storage_type="kafka",
-            rdkafka_settings=self.get_rdkafka_settings(),
-            topics=["test_1"],
-        )
+        data_storage = self.construct_output_data_storage()
         data_format = api.DataFormat(
             format_type="dsv",
             key_field_names=[],
@@ -181,11 +191,7 @@ class IncrementBenchmark(Benchmark):
             increased_number=pw.this.number + 1
         )
 
-        data_storage = api.DataStorage(
-            storage_type="kafka",
-            rdkafka_settings=self.get_rdkafka_settings(),
-            topics=["test_1"],
-        )
+        data_storage = self.construct_output_data_storage()
         data_format = api.DataFormat(
             format_type="dsv",
             key_field_names=[],
@@ -206,19 +212,35 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Pathway benchmarker")
     parser.add_argument("--type", type=str, required=True)
     parser.add_argument("--autocommit-frequency-ms", type=int)
+    parser.add_argument("--channel", type=str, default="kafka", choices=["kafka", "fs"])
+    parser.add_argument("--input-filename", type=str)
     args = parser.parse_args()
 
     autocommit_frequency = args.autocommit_frequency_ms or None
 
     if args.type == "wordcount":
-        benchmark: Benchmark = WordcountBenchmark(autocommit_frequency)
+        benchmark: Benchmark = WordcountBenchmark(
+            autocommit_frequency, args.channel, args.input_filename
+        )
     elif args.type == "weighted_wordcount":
-        benchmark = WeightedWordcountBenchmark(autocommit_frequency)
+        benchmark = WeightedWordcountBenchmark(
+            autocommit_frequency, args.channel, args.input_filename
+        )
     elif args.type == "pagerank":
-        benchmark = PagerankBenchmark(autocommit_frequency)
+        benchmark = PagerankBenchmark(
+            autocommit_frequency, args.channel, args.input_filename
+        )
     elif args.type == "increment":
-        benchmark = IncrementBenchmark(autocommit_frequency)
+        benchmark = IncrementBenchmark(
+            autocommit_frequency, args.channel, args.input_filename
+        )
     else:
         raise RuntimeError("Unknown benchmark type: " + args.type)
 
+    before = time.time()
     benchmark.run_benchmark()
+    print(
+        "threads={}\ttime={}".format(
+            os.environ.get("PATHWAY_THREADS", 1), time.time() - before
+        )
+    )
