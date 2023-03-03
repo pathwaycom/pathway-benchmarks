@@ -10,6 +10,7 @@ pub fn print_to_file(content: &str, file_name: &str) {
     let mut file = OpenOptions::new()
         .create(true) // Optionally create the file if it doesn't already exist
         .write(true)
+        .truncate(true)
         .open(file_name)
         .expect("Unable to open file");
 
