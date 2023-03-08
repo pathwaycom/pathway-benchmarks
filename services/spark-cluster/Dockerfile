@@ -8,7 +8,7 @@ RUN apt-get install -y openjdk-11-jdk
 
 # spark setup - env variables
 # verify https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/ to see which hadoop versions are available
-ENV SPARK_VERSION=3.3.1 \
+ENV SPARK_VERSION=3.3.2 \
 HADOOP_VERSION=3 \
 SPARK_HOME=/opt/spark 
 

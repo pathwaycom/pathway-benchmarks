@@ -47,7 +47,9 @@ object App
         // config.setString("taskmanager.memory.network.fraction", "1") 
 
         // val env = new LocalStreamEnvironment(config)
-        val env = StreamExecutionEnvironment.getExecutionEnvironment
+        val env = StreamExecutionEnvironment.createLocalEnvironment(1)
+
+        // val env = StreamExecutionEnvironment.getExecutionEnvironment
         // env.setRuntimeMode(RuntimeExecutionMode.BATCH);
         env.setMaxParallelism(1)
         val tableEnv = StreamTableEnvironment.create(env)
@@ -59,7 +61,6 @@ object App
         configuration.set("table.optimizer.agg-phase-strategy", "TWO_PHASE"); 
         configuration.set("table.optimizer.incremental-agg-enabled", "true");
         
-
         // val env = new RemoteStreamEnvironment("flink-wordcount-taskmanager", 3456, config, "wcount-1.0-SNAPSHOT.jar")
         // val env = ExecutionEnvironment.getExecutionEnvironment()
         val names = Array("word")

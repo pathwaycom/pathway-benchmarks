@@ -22,7 +22,23 @@ services:
       file: common-services.yml
       service: stats-collector-common
 
-  
+  spark-master:  
+    cpuset: $TESTED_CPU_SET
+    build: ../services/spark-cluster/
+    deploy:
+      resources:
+        limits:
+          memory: 16G    
+ 
+    depends_on:
+      - kafka
+    ports:
+      - "${SPARK_MASTER_UI_PORT}:8080"
+      - "${SPARK_MASTER_PORT}:7077"
+    environment:
+      - SPARK_LOCAL_IP=spark-master
+      - SPARK_WORKLOAD=master
+      
   spark-worker:    
     cpuset: $TESTED_CPU_SET
     build: ../services/spark-cluster/
@@ -49,7 +65,9 @@ services:
 
   spark-word-count:
     cpuset: $TESTED_CPU_SET
-    build: ../services/spark-word-count-scala/
+    build: 
+      context: ../services/spark-word-count-scala/
+      dockerfile: Dockerfile-cluster
     depends_on:
       - spark-master
       - spark-worker

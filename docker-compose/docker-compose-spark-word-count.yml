@@ -65,10 +65,12 @@ services:
 
   spark-word-count:
     cpuset: $TESTED_CPU_SET
-    build: ../services/spark-word-count/
+    build: 
+      context: ../services/spark-word-count/
+      dockerfile: Dockerfile-cluster
     depends_on:
-      - spark-master
       - spark-worker
+      - spark-master
     environment:
       - AUTOCOMMIT_FREQUENCY_MS
       - BENCHMARK_TYPE

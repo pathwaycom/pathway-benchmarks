@@ -20,12 +20,6 @@ import org.apache.flink.api.scala.ExecutionEnvironment
 // import org.apache.flink.streaming.api.environment.RemoteStreamEnvironment
 
 
-class WordWithCount(var word: String, var count: Int) {
-    def this() {
-      this(null, -1)
-    }
-}
-
 object App
 {
 
