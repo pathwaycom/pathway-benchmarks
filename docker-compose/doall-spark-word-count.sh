@@ -1,12 +1,16 @@
 export STATS_SHORT=1
-export STATS_TIMELINE=1
+export STATS_TIMELINE=0
 export STATS_PATHWAY_PTIME_AGGREGATED=0
+export STATS_TIME_AGGREGATED=1
 export CORES=1
 export WORKERS=1
 export ENGINE_TYPE=spark
 export BENCHMARK_TYPE=wordcount
 export COMMIT_FREQUENCY=5
 export AUTOCOMMIT_FREQUENCY_MS=100
+export DATASET_WARMUP_PREFIX_LENGTH=1000000
+export STREAMER_WAIT_TIME_MS=25000
+export STREAMER_EMIT_INTERVAL_MS=8
 
 RATE_PER_SECOND=25000 docker-compose -f docker-compose-spark-word-count.yml run stats-collector
 RATE_PER_SECOND=25000 docker-compose -f docker-compose-spark-word-count.yml down -v

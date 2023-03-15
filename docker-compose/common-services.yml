@@ -53,6 +53,9 @@ services:
       - BENCHMARK_TYPE
       - COMMIT_FREQUENCY
       - RATE_PER_SECOND
+      - DATASET_WARMUP_PREFIX_LENGTH
+      - STREAMER_WAIT_TIME_MS
+      - STREAMER_EMIT_INTERVAL_MS
     depends_on:
       kafka:
         condition: service_healthy
@@ -73,6 +76,8 @@ services:
       - STATS_SHORT
       - STATS_TIMELINE
       - STATS_PATHWAY_PTIME_AGGREGATED
+      - DATASET_WARMUP_PREFIX_LENGTH
+      - STATS_TIME_AGGREGATED
     depends_on:
       streamer:
         condition: service_completed_successfully

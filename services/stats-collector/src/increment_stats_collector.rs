@@ -99,12 +99,14 @@ fn main() {
     let mut print_short: bool = true;
     let mut print_timeline: bool = false;
     let mut print_aggregated: bool = false;
+    let mut _skip_prefix_length: u64 = 0;
 
     for i in (2..args.len()).step_by(2) {
         match args[i].as_str() {
-            "--stats_short" => print_short = args[i + 1].eq("1"),
-            "--stats_timeline" => print_timeline = args[i + 1].eq("1"),
-            "--stats_pathway_ptime_aggregated" => print_aggregated = args[i + 1].eq("1"),
+            "--stats-short" => print_short = args[i + 1].eq("1"),
+            "--stats-timeline" => print_timeline = args[i + 1].eq("1"),
+            "--stats-pathway-ptime-aggregated" => print_aggregated = args[i + 1].eq("1"),
+            "--skip-prefix-length" => _skip_prefix_length = args[i + 1].parse().unwrap(),
             _ => eprintln!("unknown parameter {} ", args[i].as_str()),
         }
     }

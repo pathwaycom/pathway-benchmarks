@@ -57,7 +57,7 @@ object App
         var configuration = tableEnv.getConfig
         configuration.set("table.exec.mini-batch.enabled", "true")
         configuration.set("table.exec.mini-batch.allow-latency", s"${pTime} ms")
-        configuration.set("table.exec.mini-batch.size", "5000")
+        configuration.set("table.exec.mini-batch.size", "20000")
         configuration.set("table.optimizer.agg-phase-strategy", "TWO_PHASE"); 
         configuration.set("table.optimizer.incremental-agg-enabled", "true");
         

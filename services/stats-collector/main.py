@@ -37,9 +37,12 @@ if __name__ == "__main__":
     parser.add_argument("--engine-type", type=str, required=True)
     parser.add_argument("--workers", type=int, default=1)
     parser.add_argument("--cores", type=int, default=1)
-    parser.add_argument("--stats_short", type=int, default=1)
-    parser.add_argument("--stats_timeline", type=int, default=1)
-    parser.add_argument("--stats_pathway_ptime_aggregated", type=int, default=1)
+    parser.add_argument("--stats-short", type=int, default=1)
+    parser.add_argument("--stats-timeline", type=int, default=1)
+    parser.add_argument("--stats-pathway-ptime-aggregated", type=int, default=1)
+    parser.add_argument("--stats-time-aggregated", type=int, default=1)
+    parser.add_argument("--skip-prefix-length", type=int, default=0)
+
     args = parser.parse_args()
 
     print("Stats-collector waiting", file=sys.stderr)
@@ -62,12 +65,23 @@ if __name__ == "__main__":
         benchmark_kind,
     )
 
-    cargo_run_command = "{} {} --stats_short {} --stats_timeline {} --stats_pathway_ptime_aggregated {}".format(
+    cargo_run_command_f = (
+        "{0} {1} "
+        + "--stats-short {2} "
+        + "--stats-timeline {3} "
+        + "--stats-pathway-ptime-aggregated {4} "
+        + "--stats-time-aggregated {5} "
+        + "--skip-prefix-length {6} "
+    )
+
+    cargo_run_command = cargo_run_command_f.format(
         args.type + "_stats_collector",
         instance_name,
         args.stats_short,
         args.stats_timeline,
         args.stats_pathway_ptime_aggregated,
+        args.stats_time_aggregated,
+        args.skip_prefix_length,
     )
 
     print("Instance name:", instance_name)

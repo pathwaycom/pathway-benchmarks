@@ -105,13 +105,13 @@ struct CountAndTime {
     pathway_time: Option<i64>,
 }
 
-#[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Debug, Eq, Ord, PartialEq, PartialOrd, Clone)]
 struct LatencyTime {
     latency: i64,
     timestamp: i64,
 }
 
-#[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Debug, Eq, Ord, PartialEq, PartialOrd, Clone)]
 struct TimeLatency {
     timestamp: i64,
     latency: i64,
@@ -121,7 +121,9 @@ struct TimeLatency {
 #[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
 struct AggregatedStats {
     min: i64,
+    p05: i64,
     med: i64,
+    p95: i64,
     max: i64,
     count: i64,
 }
@@ -130,7 +132,9 @@ fn aggregate_stats_for_batch(group: &mut dyn Iterator<Item = TimeLatency>) -> Ag
     tmp.sort_by(|a, b| b.latency.cmp(&a.latency));
     AggregatedStats {
         min: tmp[0].latency,
+        p05: tmp[tmp.len() / 20].latency,
         med: tmp[tmp.len() / 2].latency,
+        p95: tmp[tmp.len() * 19 / 20].latency,
         max: tmp[tmp.len() - 1].latency,
         count: tmp.len() as i64,
     }
@@ -143,23 +147,30 @@ fn main() {
 
     let mut print_short: bool = true;
     let mut print_timeline: bool = false;
-    let mut print_aggregated: bool = false;
-
+    let mut print_pathway_time_aggregated: bool = false;
+    let mut print_time_aggregated: bool = false;
+    let mut skip_prefix_length: usize = 0;
     for i in (2..args.len()).step_by(2) {
         match args[i].as_str() {
-            "--stats_short" => print_short = args[i + 1].eq("1"),
-            "--stats_timeline" => print_timeline = args[i + 1].eq("1"),
-            "--stats_pathway_ptime_aggregated" => print_aggregated = args[i + 1].eq("1"),
+            "--stats-short" => print_short = args[i + 1].eq("1"),
+            "--stats-timeline" => print_timeline = args[i + 1].eq("1"),
+            "--stats-pathway-ptime-aggregated" => {
+                print_pathway_time_aggregated = args[i + 1].eq("1")
+            }
+            "--stats-time-aggregated" => print_time_aggregated = args[i + 1].eq("1"),
+            "--skip-prefix-length" => skip_prefix_length = args[i + 1].parse().unwrap(),
             _ => eprintln!("unknown parameter {} ", args[i].as_str()),
         }
     }
 
     eprintln!("Logfile path: {}", args[1]);
 
-    let file_name = format!("results/{}-latency.txt", &instance_name);
-    let timeline_file_name = format!("results/{}-timeline.txt", &instance_name);
+    let file_name = format!("results/{}-latency.csv", &instance_name);
+    let timeline_file_name = format!("results/{}-timeline.csv", &instance_name);
     let aggregated_timeline_file_name =
-        format!("results/{}-aggregated-timeline.txt", &instance_name);
+        format!("results/{}-aggregated-timeline.csv", &instance_name);
+    let aggregated_pw_timeline_file_name =
+        format!("results/{}-ptime-aggregated-timeline.csv", &instance_name);
 
     let mut timeline_input: Vec<TimeLineEntry<WordCountInputLine>> = {
         let kafka_reader: KafkaReader = KafkaReader {
@@ -245,19 +256,19 @@ fn main() {
             });
         }
     }
+    let mut trimmed_latency_profile = latency_profile[skip_prefix_length..].to_vec();
+    trimmed_latency_profile.sort();
 
-    latency_profile.sort();
-
-    let len = latency_profile.len();
+    let len = trimmed_latency_profile.len();
     eprintln!("{}", &instance_name);
     for i in 0..11 {
         eprintln!(
-            "{}th decile: {}ms",
+            "{}th decile: {} ms",
             i,
-            latency_profile[((len - 1) * i) / 10].latency
+            trimmed_latency_profile[((len - 1) * i) / 10].latency
         );
     }
-    eprintln!("lost{lost_cnt} ");
+    eprintln!("lost {lost_cnt} ");
 
     if print_short {
         let mut str_buffer: String = String::new();
@@ -268,7 +279,7 @@ fn main() {
                 "{},{},{}\n",
                 &metadata,
                 x,
-                latency_profile[((len - 1) * x) / 100].latency
+                trimmed_latency_profile[((len - 1) * x) / 100].latency
             ));
         }
         str_buffer.push_str(&format!("{},-1,{}\n", &metadata, lost_cnt));
@@ -277,13 +288,33 @@ fn main() {
 
     if print_timeline {
         let mut str_buffer: String = String::new();
-        for x in &latency_timeline {
+        for x in &latency_timeline[skip_prefix_length..] {
             str_buffer.push_str(&format!("{},{}\n", x.timestamp, x.latency));
         }
         print_to_file(&str_buffer, &timeline_file_name);
     }
 
-    if print_aggregated {
+    if print_time_aggregated {
+        let mut trimmed_lt = latency_timeline[skip_prefix_length..].to_vec();
+
+        trimmed_lt.sort_by(|a, b| b.timestamp.cmp(&a.timestamp));
+        let mut tree: BTreeMap<i64, AggregatedStats> = BTreeMap::new();
+
+        for (key, mut group) in &trimmed_lt.into_iter().group_by(|elt| (elt.timestamp)) {
+            tree.insert(key, aggregate_stats_for_batch(&mut group));
+        }
+        let mut str_buffer: String = String::new();
+        for (key, x) in tree.iter() {
+            str_buffer.push_str(&format!(
+                "{},{},{},{},{},{},{},{}\n",
+                &metadata, key, x.max, x.p95, x.med, x.p05, x.min, x.count
+            ));
+        }
+
+        print_to_file(&str_buffer, &aggregated_timeline_file_name);
+    }
+
+    if print_pathway_time_aggregated {
         let mut str_buffer: String = String::new();
         latency_timeline.sort_by(|a, b| b.pathway_time.unwrap().cmp(&a.pathway_time.unwrap()));
         let mut tree: BTreeMap<i64, AggregatedStats> = BTreeMap::new();
@@ -297,11 +328,11 @@ fn main() {
 
         for (key, x) in tree.iter() {
             str_buffer.push_str(&format!(
-                "{},{},{},{},{},{}\n",
-                &metadata, key, x.max, x.med, x.min, x.count
+                "{},{},{},{},{},{},{},{}\n",
+                &metadata, key, x.max, x.p95, x.med, x.p05, x.min, x.count
             ));
         }
 
-        print_to_file(&str_buffer, &aggregated_timeline_file_name);
+        print_to_file(&str_buffer, &aggregated_pw_timeline_file_name);
     }
 }
