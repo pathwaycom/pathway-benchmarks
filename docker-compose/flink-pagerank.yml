@@ -1,0 +1,39 @@
+version: "3.8"
+services:
+
+  flink-pagerank-jobmanager:
+    cpuset: $TESTED_CPU_SET
+    build: ../services/flink-pagerank
+    command: jobmanager
+    ports:
+      - "${FLINK_UI_PORT}:8081"
+
+    environment:
+      - CORES
+      - WORKERS
+      - |
+        FLINK_PROPERTIES=
+        taskmanager.rpc.address: flink-pagerank-taskmanager
+        jobmanager.rpc.address: flink-pagerank-jobmanager
+        taskmanager.memory.process.size: 20G
+        jobmanager.memory.process.size: 20G
+        parallelism.default: 1
+    volumes:
+      - ../services/flink-pagerank/pagerank:/app
+
+  flink-pagerank-taskmanager:
+    cpuset: $TESTED_CPU_SET
+    build: ../services/flink-pagerank
+    command: taskmanager
+    depends_on:
+      - flink-pagerank-jobmanager
+    environment:
+      - CORES
+      - WORKERS
+      - |
+        FLINK_PROPERTIES=
+        taskmanager.rpc.address: flink-pagerank-taskmanager
+        jobmanager.rpc.address: flink-pagerank-jobmanager
+        taskmanager.memory.process.size: 20G
+        jobmanager.memory.process.size: 20G
+        parallelism.default: 1
