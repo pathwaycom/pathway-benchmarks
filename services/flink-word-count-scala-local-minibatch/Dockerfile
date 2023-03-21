@@ -1,4 +1,4 @@
-FROM flink:1.16-scala_2.12
+FROM flink:1.16.1-scala_2.12
 
 WORKDIR /flink-word-count-scala
 RUN apt-get update
@@ -30,6 +30,6 @@ RUN cd wcount && mvn package -Pdocker-build 1>&2
 # ENV INTERNAL_HADOOP_CLASSPATHS /opt/flink/usrlib/
 
 
-CMD java -cp /opt/flink/lib/*:/opt/flink/usrlib/wcount-1.0-SNAPSHOT-jar-with-dependencies.jar App --commit_interval  ${AUTOCOMMIT_FREQUENCY_MS}
+CMD java -cp /opt/flink/lib/*:/opt/flink/usrlib/wcount-1.0-SNAPSHOT.jar App --commit_interval  ${AUTOCOMMIT_FREQUENCY_MS}
 # CMD ls /opt/flink/usrlib/*
 # CMD cat /opt/flink/bin/flink-daemon.sh

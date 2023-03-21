@@ -1,6 +1,7 @@
 import org.apache.flink.api.common.eventtime.WatermarkStrategy
 import org.apache.flink.api.common.typeinfo.Types
 import org.apache.flink.api.common.serialization.SimpleStringSchema
+import org.apache.flink.streaming.connectors.kafka.table.KafkaConnectorOptions
 import org.apache.flink.connector.kafka.sink.{KafkaRecordSerializationSchema, KafkaSink}
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer
 import org.apache.flink.connector.kafka.source.KafkaSource
@@ -14,10 +15,9 @@ import org.apache.flink.formats.csv.CsvRowSerializationSchema.Builder
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.formats.json.JsonRowDeserializationSchema
 import org.apache.flink.formats.json.JsonRowDeserializationSchema.Builder
-
-
-
+import org.apache.flink.table.api._
 import org.apache.flink.streaming.api.scala._
+
 import org.apache.flink.api.scala.ExecutionEnvironment
 // import org.apache.flink.streaming.api.environment.RemoteStreamEnvironment
 
@@ -42,17 +42,31 @@ object App
         val options = nextArg(Map(), args.toList)
         val pTime = options("commit_interval")
 
-        // val config = new Configuration();
-        // config.setString("taskmanager.memory.network.min", "6 Gb")
-        // config.setString("taskmanager.memory.network.fraction", "1") 
-
-        // val env = new LocalStreamEnvironment(config)
         val env = StreamExecutionEnvironment.createLocalEnvironment(1)
-
-        // val env = StreamExecutionEnvironment.getExecutionEnvironment
-        // env.setRuntimeMode(RuntimeExecutionMode.BATCH);
         env.setMaxParallelism(1)
-        val tableEnv = StreamTableEnvironment.create(env)
+
+        val settings = EnvironmentSettings
+        .newInstance()
+        .inStreamingMode()
+        // .inBatchMode()
+        .build()
+
+        val tableEnv = TableEnvironment.create(settings)
+
+        val table = tableEnv.createTemporaryTable("words", TableDescriptor.forConnector("kafka")
+            .schema(
+                Schema.newBuilder()
+                .column("word", DataTypes.STRING().notNull())
+                .build()
+            )
+            .partitionedBy("word")
+            .option("topic", "test_0")
+            .option("scan.startup.mode", "latest-offset")
+            .option("properties.group.id", "flink_scala_wordcount_consumers")
+            .option("properties.bootstrap.servers", "kafka:9092")
+            .format("json")
+            .build()
+        )
 
         var configuration = tableEnv.getConfig
         configuration.set("table.exec.mini-batch.enabled", "true")
@@ -60,44 +74,24 @@ object App
         configuration.set("table.exec.mini-batch.size", "20000")
         configuration.set("table.optimizer.agg-phase-strategy", "TWO_PHASE"); 
         configuration.set("table.optimizer.incremental-agg-enabled", "true");
-        
-        // val env = new RemoteStreamEnvironment("flink-wordcount-taskmanager", 3456, config, "wcount-1.0-SNAPSHOT.jar")
-        // val env = ExecutionEnvironment.getExecutionEnvironment()
-        val names = Array("word")
 
-        val jsonDes =  new JsonRowDeserializationSchema(Types.ROW_NAMED(names ,Types.STRING))
-        // val deserializer = KafkaRecordDeserializationSchema.valueOnly(jsonDes)
+        val sinkTable = tableEnv.createTemporaryTable("sink", TableDescriptor.forConnector("upsert-kafka")
+            .schema(
+                Schema.newBuilder()
+                .column("word", DataTypes.STRING().notNull())
+                .column("count", DataTypes.BIGINT().notNull())
+                .primaryKey("word")
+                .build()
+            )
+            
+            .option("topic", "test_1")
+            .option("properties.bootstrap.servers", "kafka:9092")
+            .option("key.format", "csv")
+            .option("value.format", "csv")
+            .build()
+        )
 
-        val kafkaSource = KafkaSource.builder()
-        .setBootstrapServers("kafka:9092")
-        .setTopics("test_0")
-        .setGroupId("scala_worker_consumer")
-        .setStartingOffsets(OffsetsInitializer.latest())
-        .setValueOnlyDeserializer(jsonDes) 
-        .build()
+        tableEnv.sqlQuery("select word, count(*) from words group by word").insertInto("sink").execute()
 
-        val serializer = KafkaRecordSerializationSchema.builder()
-        .setValueSerializationSchema(new SimpleStringSchema())
-        .setTopic("test_1")
-        .build()
-
-        val kafkaSink = KafkaSink.builder()
-        .setBootstrapServers("kafka:9092")
-        .setRecordSerializer(serializer)
-        .build()
-
-        val stream = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "Kafka Source").map(v=>v.getField(0))
-        val table = tableEnv.fromDataStream(stream)
-
-        tableEnv.createTemporaryView("words", table)
-        val resultTable = tableEnv.sqlQuery("select f0, count(*) from words group by f0")
-        val resultStream =  tableEnv.toChangelogStream(resultTable)
-        // resultStream.print()
-        val formattedResultStream = resultStream
-        .map(v => s"${v.getField(0)},${v.getField(1)},${v.getKind().shortString()}")
-        
-        formattedResultStream.sinkTo(kafkaSink)
-
-        env.execute("wordcount pass")
     }
 }

@@ -25,7 +25,6 @@ services:
   flink-wordcount:
     cpuset: $TESTED_CPU_SET
     build: ../services/flink-word-count-scala-local-minibatch
-    # command: taskmanager --job-classname App --commit_interval ${AUTOCOMMIT_FREQUENCY_MS}
     depends_on:
       kafka:
         condition: service_healthy
@@ -42,13 +41,8 @@ services:
       - STATS_PATHWAY_PTIME_AGGREGATED
       - |
         FLINK_PROPERTIES=
-        taskmanager.rpc.address: flink-wordcount-taskmanager
-        jobmanager.rpc.address: flink-wordcount-worker
         taskmanager.memory.process.size: 20G
         jobmanager.memory.process.size: 20G
         parallelism.default: 1
-
-  # taskmanager.memory.flink.size: 16G
-  # taskmanager.memory.task.heap.size: 8G
 
   
