@@ -78,6 +78,7 @@ services:
       - STATS_PATHWAY_PTIME_AGGREGATED
       - DATASET_WARMUP_PREFIX_LENGTH
       - STATS_TIME_AGGREGATED
+      - DICT_SIZE
     depends_on:
       streamer:
         condition: service_completed_successfully

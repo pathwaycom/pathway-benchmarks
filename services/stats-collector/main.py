@@ -42,6 +42,7 @@ if __name__ == "__main__":
     parser.add_argument("--stats-pathway-ptime-aggregated", type=int, default=1)
     parser.add_argument("--stats-time-aggregated", type=int, default=1)
     parser.add_argument("--skip-prefix-length", type=int, default=0)
+    parser.add_argument("--dict-size", type=int, default=5000)
 
     args = parser.parse_args()
 
@@ -72,6 +73,7 @@ if __name__ == "__main__":
         + "--stats-pathway-ptime-aggregated {4} "
         + "--stats-time-aggregated {5} "
         + "--skip-prefix-length {6} "
+        + "--dict-size {7}"
     )
 
     cargo_run_command = cargo_run_command_f.format(
@@ -82,6 +84,7 @@ if __name__ == "__main__":
         args.stats_pathway_ptime_aggregated,
         args.stats_time_aggregated,
         args.skip_prefix_length,
+        args.dict_size,
     )
 
     print("Instance name:", instance_name)

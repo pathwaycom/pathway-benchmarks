@@ -37,7 +37,7 @@ def squash_aggregates(metadata, file_location):
     for line in f.readlines():
         data = line.split(",")[-1].rstrip("\n")
         ret += f",{data}"
-    return f"{metadata}{ret}\n"
+    return f"{metadata},5000{ret}\n"
 
 
 def main():
@@ -49,7 +49,7 @@ def main():
     )
 
     aggr_total.write(
-        "engine,benchmark,timestamp,workers,cores,batch_length_ms,_,throughput,_,"
+        "engine,benchmark,timestamp,workers,cores,batch_length_ms,_,throughput,_,dict_size,"
         + "min,p01,p05,p10,p20,p30,p40,median,p60,p70,p80,p90,p95,p99,max,lost\n"
     )
 
@@ -68,7 +68,7 @@ def main():
             )
             for name in [x for x in file_names if "latency" in x]:
                 metadata = (
-                    f"{engine},{name.replace('-', ',').replace(',latency.txt', '')}"
+                    f"{engine},{name.replace('-', ',').replace(',latency.csv', '')}"
                 )
                 file_location = f"{engine}/{name}"
                 line = squash_aggregates(metadata, file_location)

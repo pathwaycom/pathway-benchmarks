@@ -28,7 +28,7 @@ fn main() {
             _ => eprintln!("unknown parameter {} ", args[i].as_str()),
         }
     }
-
+    emit_interval_ms += messages_per_second / 100000;
     // on small throughputs we want to send messages more often
     // the factor at the ent essentially says what is the send interval (in ms)
     // tested for 300k throughput, 5 seems too low, 10 seem to have a fairly high margin
@@ -46,7 +46,7 @@ fn main() {
     client_config.set("enable.auto.commit", "true");
     //the one below is questionble - the general idea is to trigger actual send at every batch
     client_config.set("queue.buffering.max.messages", batch_s.to_string());
-
+    client_config.set("queue.buffering.max.ms", emit_interval_ms.to_string());
     let producer: BaseProducer = client_config.create().unwrap();
 
     //more like time to send 1000 messages, to hit 1 second after messages per second
@@ -55,11 +55,17 @@ fn main() {
 
     let sleep_after_each_1000_mcs = 1_000_000_000 / messages_per_second;
 
+    let threshold_1 = skip_prefix_length / 8;
+    let mut threshold_2 = skip_prefix_length / 4;
+    let mut threshold_3 = skip_prefix_length / 2;
+    let mut threshold_4 = skip_prefix_length;
+    let mut warm_up = true;
+
     let mut n_sent = 0;
     let file = File::open(dataset_path).unwrap();
 
     let start_time = Instant::now();
-
+    let mut offs = 0;
     for line in BufReader::new(file).lines() {
         let line_to_send = line.unwrap();
         let mut entry = BaseRecord::to("test_0").payload(&line_to_send).key("");
@@ -88,12 +94,35 @@ fn main() {
             } else {
                 eprint!(".")
             }
-        }
+            // non zero offs reduces throughput
+            if warm_up {
+                n_sent += offs;
+                threshold_2 += offs;
+                threshold_3 += offs;
+                threshold_4 += offs;
 
-        if n_sent == skip_prefix_length {
-            eprintln!("Break to unload initial queue");
-            sleep(Duration::from_millis(wait_time_ms));
-            n_sent += wait_time_ms * messages_per_second / 1000;
+                if n_sent >= threshold_1 && n_sent < threshold_2 && offs == 0 {
+                    eprintln!("Break to unload initial queue");
+                    sleep(Duration::from_millis(wait_time_ms));
+                    n_sent += wait_time_ms * messages_per_second / 1000;
+                    threshold_2 += wait_time_ms * messages_per_second / 1000;
+                    threshold_3 += wait_time_ms * messages_per_second / 1000;
+                    threshold_4 += wait_time_ms * messages_per_second / 1000;
+                    offs = batch_s / 2;
+                }
+                if n_sent >= threshold_2 && n_sent < threshold_3 && offs == batch_s / 2 {
+                    eprintln!("speed_up_1");
+                    offs = batch_s / 4;
+                }
+                if n_sent >= threshold_3 && n_sent < threshold_4 && offs == batch_s / 4 {
+                    eprintln!("speed_up_2");
+                    offs = 0;
+                }
+                if n_sent >= threshold_4 {
+                    eprintln!("begin test run!");
+                    warm_up = false;
+                }
+            }
         }
     }
 

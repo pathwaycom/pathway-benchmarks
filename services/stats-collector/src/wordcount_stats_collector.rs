@@ -143,13 +143,13 @@ fn aggregate_stats_for_batch(group: &mut dyn Iterator<Item = TimeLatency>) -> Ag
 fn main() {
     let args: Vec<String> = env::args().collect();
     let instance_name: String = args[1].to_string();
-    let metadata = instance_name.replace(['/', '-'], ",");
-
+    let _metadata = instance_name.replace(['/', '-'], ",");
     let mut print_short: bool = true;
     let mut print_timeline: bool = false;
     let mut print_pathway_time_aggregated: bool = false;
     let mut print_time_aggregated: bool = false;
     let mut skip_prefix_length: usize = 0;
+    let mut dict_size: i64 = 0;
     for i in (2..args.len()).step_by(2) {
         match args[i].as_str() {
             "--stats-short" => print_short = args[i + 1].eq("1"),
@@ -159,9 +159,11 @@ fn main() {
             }
             "--stats-time-aggregated" => print_time_aggregated = args[i + 1].eq("1"),
             "--skip-prefix-length" => skip_prefix_length = args[i + 1].parse().unwrap(),
+            "--dict-size" => dict_size = args[i + 1].parse().unwrap(),
             _ => eprintln!("unknown parameter {} ", args[i].as_str()),
         }
     }
+    let metadata = format!("{},{}", _metadata, dict_size);
 
     eprintln!("Logfile path: {}", args[1]);
 

@@ -13,6 +13,7 @@ metadata = [
     "we_should_skip_this",
     "throughput",
     "don't-need-that-either",
+    "dict_size",
 ]
 
 percentiles = [
@@ -57,7 +58,7 @@ for (dir_path, dir_names, file_names) in file_tree_listed:
         filtered = collected_aggregates[
             collected_aggregates["batch_length_ms"] == batch_s
         ]
-        filtered = filtered[filtered["throughput"] <= 350000].sort_values("throughput")
+        filtered = filtered.sort_values("throughput")
         print(filtered.size)
         if filtered.size == 0:
             continue

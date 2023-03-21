@@ -19,4 +19,4 @@ RUN cargo build --release
 
 COPY ./main.py /stats-collector/main.py
 
-CMD python main.py --type $BENCHMARK_TYPE --batch-size $COMMIT_FREQUENCY --rate-per-second $RATE_PER_SECOND --autocommit-frequency-ms $AUTOCOMMIT_FREQUENCY_MS --engine-type $ENGINE_TYPE --workers $WORKERS --cores $CORES --stats-short $STATS_SHORT --stats-timeline $STATS_TIMELINE --stats-pathway-ptime-aggregated $STATS_PATHWAY_PTIME_AGGREGATED --stats-time-aggregated $STATS_TIME_AGGREGATED --skip-prefix-length $DATASET_WARMUP_PREFIX_LENGTH
+CMD python main.py --type $BENCHMARK_TYPE --batch-size $COMMIT_FREQUENCY --rate-per-second $RATE_PER_SECOND --autocommit-frequency-ms $AUTOCOMMIT_FREQUENCY_MS --engine-type $ENGINE_TYPE --workers $WORKERS --cores $CORES --stats-short $STATS_SHORT --stats-timeline $STATS_TIMELINE --stats-pathway-ptime-aggregated $STATS_PATHWAY_PTIME_AGGREGATED --stats-time-aggregated $STATS_TIME_AGGREGATED --skip-prefix-length $DATASET_WARMUP_PREFIX_LENGTH --dict-size $DICT_SIZE
