@@ -38,6 +38,7 @@ services:
       - RATE_PER_SECOND
       - CORES
       - WORKERS
+      - PATHWAY_YOLO_RARE_WAKEUPS
     depends_on:
       kafka:
         condition: service_healthy
