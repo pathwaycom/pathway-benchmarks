@@ -28,7 +28,7 @@ services:
       DOCKER_API_VERSION: 1.22
       HOSTNAME_COMMAND: "route -n | awk '/UG[ \t]/{print $$2}'"
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_CREATE_TOPICS: "test_0:1:1:delete,test_1:1:1:delete"
+      KAFKA_CREATE_TOPICS: "test_0:24:1:delete,test_1:1:1:delete"
       KAFKA_DELETE_TOPIC_ENABLE: "true"
       KAFKA_LOG_RETENTION_HOURS: -1
       KAFKA_LOG_RETENTION_BYTES: -1

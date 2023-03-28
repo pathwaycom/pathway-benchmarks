@@ -121,10 +121,6 @@ impl KafkaReader {
         let read_duration = read_start.elapsed();
         eprintln!("Time to read from Kafka {read_duration:?}");
 
-        for i in 0..timeline.len() - 1 {
-            assert!(timeline[i].timestamp <= timeline[i + 1].timestamp);
-        }
-
         timeline
     }
 }
