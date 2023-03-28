@@ -60,7 +60,20 @@
         <artifactId>flink-table-api-java</artifactId>
         <version>1.16.0</version>
     </dependency>
-    
+
+    <!-- https://mvnrepository.com/artifact/org.apache.flink/flink-metrics-core -->
+    <dependency>
+        <groupId>org.apache.flink</groupId>
+        <artifactId>flink-metrics-core</artifactId>
+        <version>1.16.0</version>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/org.apache.flink/flink-metrics-slf4j -->
+    <dependency>
+        <groupId>org.apache.flink</groupId>
+        <artifactId>flink-metrics-slf4j</artifactId>
+        <version>1.16.0</version>
+    </dependency>
+
     <!-- https://mvnrepository.com/artifact/org.apache.flink/flink-table -->
     <dependency>
         <groupId>org.apache.flink</groupId>
@@ -146,9 +159,9 @@
 				<artifactId>maven-jar-plugin</artifactId>
 				<configuration>
 				  <!-- DO NOT include log4j.properties file in your Jar -->
-				  <excludes>
+				  <!-- <excludes>
 					<exclude>**/log4j.properties</exclude>
-				  </excludes>
+				  </excludes> -->
 				  <archive>
 					<manifest>
 						<!-- Jar file entry point -->
