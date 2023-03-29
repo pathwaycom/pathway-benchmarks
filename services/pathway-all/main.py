@@ -1,5 +1,7 @@
 import argparse
 import os
+import resource
+import sys
 import time
 
 import pathway as pw
@@ -13,7 +15,9 @@ KAFKA_PORT = 8192
 
 
 class Benchmark:
-    def __init__(self, autocommit_frequency_ms, channel, input_filename):
+    def __init__(
+        self, autocommit_frequency_ms, channel, input_filename, *args, **kwargs
+    ):
         self._autocommit_frequency_ms = autocommit_frequency_ms
         self._channel = channel
         self._input_filename = input_filename
@@ -36,6 +40,7 @@ class Benchmark:
                 storage_type="kafka",
                 rdkafka_settings=self.get_rdkafka_settings(),
                 topics=["test_0"],
+                parallel_readers=100,
             )
         elif self._channel == "fs":
             return api.DataStorage(
@@ -52,7 +57,7 @@ class Benchmark:
                 topics=["test_1"],
             )
         elif self._channel == "fs":
-            return api.DataStorage(storage_type="fs", path="output.txt")
+            return api.DataStorage(storage_type="null")
         else:
             raise RuntimeError("Unknown data channel: {}".format(self._channel))
 
@@ -61,12 +66,23 @@ class Benchmark:
 
 
 class PagerankBenchmark(Benchmark):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.pagerank_steps = kwargs.get("pagerank_steps", 5)
+
     def run_benchmark(self):
         data_storage = self.construct_input_data_storage()
         data_format = api.DataFormat(
             format_type="jsonlines",
             key_field_names=None,
-            value_fields=_form_value_fields(None, ["u", "v"], None),
+            value_fields=_form_value_fields(
+                None,
+                ["u", "v"],
+                {
+                    "u": pw.Type.INT,
+                    "v": pw.Type.INT,
+                },
+            ),
         )
         edges_getter = table_from_datasource(
             datasource.GenericDataSource(
@@ -79,7 +95,8 @@ class PagerankBenchmark(Benchmark):
             u=edges_getter.pointer_from(pw.this.u),
             v=edges_getter.pointer_from(pw.this.v),
         )
-        result = pagerank(edges, 5)
+        print("Launching pagerank with {} steps...".format(self.pagerank_steps))
+        result = pagerank(edges, self.pagerank_steps)
 
         data_storage = self.construct_output_data_storage()
         data_format = api.DataFormat(
@@ -214,6 +231,7 @@ if __name__ == "__main__":
     parser.add_argument("--autocommit-frequency-ms", type=int)
     parser.add_argument("--channel", type=str, default="kafka", choices=["kafka", "fs"])
     parser.add_argument("--input-filename", type=str)
+    parser.add_argument("--pagerank-steps", type=int, default=5)
     args = parser.parse_args()
 
     autocommit_frequency = args.autocommit_frequency_ms or None
@@ -228,7 +246,10 @@ if __name__ == "__main__":
         )
     elif args.type == "pagerank":
         benchmark = PagerankBenchmark(
-            autocommit_frequency, args.channel, args.input_filename
+            autocommit_frequency,
+            args.channel,
+            args.input_filename,
+            pagerank_steps=args.pagerank_steps,
         )
     elif args.type == "increment":
         benchmark = IncrementBenchmark(
@@ -239,8 +260,20 @@ if __name__ == "__main__":
 
     before = time.time()
     benchmark.run_benchmark()
-    print(
-        "threads={}\ttime={}".format(
-            os.environ.get("PATHWAY_THREADS", 1), time.time() - before
-        )
+    result = "runtime=pathway\tdataset=livejournal\tworkers={}\tsteps={}\ttime_elapsed={}\tmemory={}\n".format(
+        os.environ.get("PATHWAY_THREADS", 1),
+        args.pagerank_steps,
+        time.time() - before,
+        resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
     )
+    print(result, file=sys.stderr)
+    with open(
+        "results/{}-{}-{}-{}.txt".format(
+            args.type,
+            args.pagerank_steps,
+            os.environ.get("PATHWAY_THREADS", 1),
+            time.time(),
+        ),
+        "w",
+    ) as f:
+        f.write(result)
