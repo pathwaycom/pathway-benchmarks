@@ -4,7 +4,7 @@ from datetime import datetime
 if __name__ == "__main__":
     fname = sys.argv[1]
     f = open(fname, "r")
-    summed_used_memory_readouts = []
+    summed_used_memory_readouts = [0]
     sum = 0
     job_jvm_heap_used = 0
     job_jvm_nonheap_used = 0
@@ -44,7 +44,7 @@ if __name__ == "__main__":
         if "Status.JVM.Memory.Heap.Used" in line and ".taskmanager." in line:
             task_jvm_heap_used = int(line.split(" ")[-1])
             continue
-        if "Status.JVM.Memory.Heap.Used" in line and ".taskmanager." in line:
+        if "Status.JVM.Memory.NonHeap.Used" in line and ".taskmanager." in line:
             task_jvm_nonheap_used = int(line.split(" ")[-1])
             continue
 
@@ -59,4 +59,4 @@ if __name__ == "__main__":
     duration = (end_datetime - start_datetime).seconds
     max_memory = max(summed_used_memory_readouts)
     max_memory_gb = max_memory / (1024**3)
-    print(f"{duration} {max_memory/1024}")
+    print(f"{duration} {duration} {max_memory/1024}")
