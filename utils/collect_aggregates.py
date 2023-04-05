@@ -1,35 +1,5 @@
 import os
 
-# todos
-# -- parametrize streamer window size
-# -- make this script up to date
-# -- add grouping by commit-window-size (filtering it is)
-# make python script for all the experiments
-# set up new experiments (mostly for pathway and vanilla flink,
-#   as those don't have any queued attempts on improvements)
-
-# to do later:
-# add speed ramp-up for streamer? (a little bit annoying,
-#   but can be done by artificially inflating n_sent)
-# test flink tableapi without streaming api for io
-# test spark wordcount without tableapi (should be easy in scala)
-# make kstreams commit windows behave (if possible at all)
-# write some content on benchmarks
-# # introduce wordcount benchmark
-# # --  state pathways stats (low latency to around 300k, slightly higher latency
-#   puts us at better throughput),
-# # -- (ongoing) methodology - define latency
-# # methodology - discuss batch sizes
-# # methodology - discuss dictionary size
-# # methodology - disclaimers on fine tuning
-# # methodology - disclaimers on local environment
-# # detailed comparison (for each of them - latency-throughput plot and a low
-#       throughput-latency plot, for 2 windows (if windowed))
-# # # pathway section
-# # # flink section
-# # # spark section
-# # # kstreams section
-
 
 def squash_aggregates(metadata, file_location):
     f = open(f"../docker-compose/results/{file_location}")
@@ -37,7 +7,9 @@ def squash_aggregates(metadata, file_location):
     for line in f.readlines():
         data = line.split(",")[-1].rstrip("\n")
         ret += f",{data}"
-    return f"{metadata},5000{ret}\n"
+
+    m_cols = metadata.split(",")
+    return f"{','.join(m_cols[:10])}{ret},{','.join(m_cols[10:])}\n"
 
 
 def main():
@@ -49,8 +21,9 @@ def main():
     )
 
     aggr_total.write(
-        "engine,benchmark,timestamp,workers,cores,batch_length_ms,_,throughput,_,dict_size,"
-        + "min,p01,p05,p10,p20,p30,p40,median,p60,p70,p80,p90,p95,p99,max,lost\n"
+        "engine,benchmark,timestamp,workers,cores,batch_length_ms,_,throughput,_,version(code)"
+        + ",min,p01,p05,p10,p20,p30,p40,median,p60,p70,p80,p90,p95,p99,max,lost"
+        + ",dict_size,skip_prefix_length,wait_time_ms,recorded_dataset_size\n"
     )
 
     for (dir_path, dir_names, file_names) in file_tree_listed:
@@ -63,8 +36,9 @@ def main():
             "w+",
         ) as f:
             f.write(
-                "engine,benchmark,timestamp,workers,cores,batch_length_ms,_,throughput,_,"
-                + "min,p01,p05,p10,p20,p30,p40,median,p60,p70,p80,p90,p95,p99,max,lost\n"
+                "engine,benchmark,timestamp,workers,cores,batch_length_ms,_,throughput,_version(code)"
+                + ",min,p01,p05,p10,p20,p30,p40,median,p60,p70,p80,p90,p95,p99,max,lost"
+                + ",skip_prefix_length,wait_time_ms,recorded_dataset_size\n"
             )
             for name in [x for x in file_names if "latency" in x]:
                 metadata = (

@@ -3,17 +3,17 @@ import os
 import matplotlib.pyplot as plt
 import pandas as pd
 
-metadata = [
+metadata_pref = [
     "framework",
     "benchmark",
     "run_timestamp",
     "workers",
     "cores",
     "batch_length_ms",
-    "we_should_skip_this",
+    "-",
     "throughput",
-    "don't-need-that-either",
-    "dict_size",
+    "--",
+    "version(code)",
 ]
 
 percentiles = [
@@ -35,7 +35,13 @@ percentiles = [
     "lost",
 ]
 
-columns = metadata + percentiles
+metadata_suff = [
+    "dict_size",
+    "skip_prefix_length",
+    "wait_time_ms",
+    "recorded_dataset_size",
+]
+columns = metadata_pref + percentiles + metadata_suff
 
 results_dir, *file_tree_listed = os.walk("../docker-compose/results/")
 

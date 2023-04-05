@@ -5,7 +5,6 @@ import random
 random.seed(1)
 
 WORD_SIZE = 7
-TEXT_SIZE = 24000000
 COMMIT_EVERY_LINES = None
 
 
@@ -23,12 +22,13 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="wordcount test generator")
     parser.add_argument("--dict-size", type=int, required=False, default=5000)
+    parser.add_argument("--dataset-size", type=int, required=False, default=76000000)
     args = parser.parse_args()
 
     dictionary = generate_dictionary(args.dict_size)
     with open("wordcount-large.csv", "w") as f:
         lines_written = 0
-        for _ in range(TEXT_SIZE):
+        for _ in range(args.dataset_size):
             current_word = random.choice(dictionary)
             current_word_as_json = {"word": current_word}
             f.write(json.dumps(current_word_as_json) + "\n")

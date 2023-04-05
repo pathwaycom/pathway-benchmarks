@@ -23,6 +23,10 @@ services:
       service: stats-collector-common
 
   spark-word-count:
+    depends_on:
+      kafka: 
+        condition: service_healthy
+
     cpuset: $TESTED_CPU_SET
     build: ../services/spark-word-count-scala/
     environment:

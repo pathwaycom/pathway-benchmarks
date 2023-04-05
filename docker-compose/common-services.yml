@@ -79,6 +79,10 @@ services:
       - DATASET_WARMUP_PREFIX_LENGTH
       - STATS_TIME_AGGREGATED
       - DICT_SIZE
+      - RECORDED_DATASET_SIZE
+      - STREAMER_WAIT_TIME_MS
+      - CODE_VERSION 
+
     depends_on:
       streamer:
         condition: service_completed_successfully

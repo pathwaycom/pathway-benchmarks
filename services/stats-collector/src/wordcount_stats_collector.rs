@@ -142,14 +142,13 @@ fn aggregate_stats_for_batch(group: &mut dyn Iterator<Item = TimeLatency>) -> Ag
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let instance_name: String = args[1].to_string();
-    let _metadata = instance_name.replace(['/', '-'], ",");
+    let instance_prefix: String = args[1].to_string();
+    let mut instance_suffix: String = "unknown".to_string();
     let mut print_short: bool = true;
     let mut print_timeline: bool = false;
     let mut print_pathway_time_aggregated: bool = false;
     let mut print_time_aggregated: bool = false;
     let mut skip_prefix_length: usize = 0;
-    let mut dict_size: i64 = 0;
     for i in (2..args.len()).step_by(2) {
         match args[i].as_str() {
             "--stats-short" => print_short = args[i + 1].eq("1"),
@@ -159,18 +158,23 @@ fn main() {
             }
             "--stats-time-aggregated" => print_time_aggregated = args[i + 1].eq("1"),
             "--skip-prefix-length" => skip_prefix_length = args[i + 1].parse().unwrap(),
-            "--dict-size" => dict_size = args[i + 1].parse().unwrap(),
+            "--instance-suffix" => instance_suffix = args[i + 1].parse().unwrap(),
             _ => eprintln!("unknown parameter {} ", args[i].as_str()),
         }
     }
-    let metadata = format!("{},{}", _metadata, dict_size);
 
-    eprintln!("Logfile path: {}", args[1]);
+    let metadata_pref = instance_prefix.replace(['/', '-'], ",");
+    let metadata_suff = instance_suffix.replace(['-'], ",");
+
+    let instance_name = format!("{}-{}", &instance_prefix, &instance_suffix);
 
     let file_name = format!("results/{}-latency.csv", &instance_name);
     let timeline_file_name = format!("results/{}-timeline.csv", &instance_name);
     let aggregated_timeline_file_name =
         format!("results/{}-aggregated-timeline.csv", &instance_name);
+    let pref_aggregated_timeline_file_name =
+        format!("results/{}-pref-aggregated-timeline.csv", &instance_name);
+
     let aggregated_pw_timeline_file_name =
         format!("results/{}-ptime-aggregated-timeline.csv", &instance_name);
 
@@ -278,13 +282,17 @@ fn main() {
 
         for x in relevant_percentiles {
             str_buffer.push_str(&format!(
-                "{},{},{}\n",
-                &metadata,
+                "{},{},{},{}\n",
+                &metadata_pref,
+                &metadata_suff,
                 x,
                 trimmed_latency_profile[((len - 1) * x) / 100].latency
             ));
         }
-        str_buffer.push_str(&format!("{},-1,{}\n", &metadata, lost_cnt));
+        str_buffer.push_str(&format!(
+            "{},{},-1,{}\n",
+            &metadata_pref, &metadata_suff, lost_cnt
+        ));
         print_to_file(&str_buffer, &file_name)
     }
 
@@ -308,12 +316,32 @@ fn main() {
         let mut str_buffer: String = String::new();
         for (key, x) in tree.iter() {
             str_buffer.push_str(&format!(
-                "{},{},{},{},{},{},{},{}\n",
-                &metadata, key, x.max, x.p95, x.med, x.p05, x.min, x.count
+                "{},{},{},{},{},{},{},{},{}\n",
+                &metadata_pref, &metadata_suff, key, x.max, x.p95, x.med, x.p05, x.min, x.count
             ));
         }
 
         print_to_file(&str_buffer, &aggregated_timeline_file_name);
+    }
+
+    if print_time_aggregated {
+        let mut trimmed_lt = latency_timeline[0..skip_prefix_length].to_vec();
+
+        trimmed_lt.sort_by(|a, b| b.timestamp.cmp(&a.timestamp));
+        let mut tree: BTreeMap<i64, AggregatedStats> = BTreeMap::new();
+
+        for (key, mut group) in &trimmed_lt.into_iter().group_by(|elt| (elt.timestamp)) {
+            tree.insert(key, aggregate_stats_for_batch(&mut group));
+        }
+        let mut str_buffer: String = String::new();
+        for (key, x) in tree.iter() {
+            str_buffer.push_str(&format!(
+                "{},{},{},{},{},{},{},{},{}\n",
+                &metadata_pref, &metadata_suff, key, x.max, x.p95, x.med, x.p05, x.min, x.count
+            ));
+        }
+
+        print_to_file(&str_buffer, &pref_aggregated_timeline_file_name);
     }
 
     if print_pathway_time_aggregated {
@@ -330,8 +358,8 @@ fn main() {
 
         for (key, x) in tree.iter() {
             str_buffer.push_str(&format!(
-                "{},{},{},{},{},{},{},{}\n",
-                &metadata, key, x.max, x.p95, x.med, x.p05, x.min, x.count
+                "{},{},{},{},{},{},{},{},{}\n",
+                &metadata_pref, &metadata_suff, key, x.max, x.p95, x.med, x.p05, x.min, x.count
             ));
         }
 

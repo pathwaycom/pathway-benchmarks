@@ -43,7 +43,9 @@ if __name__ == "__main__":
     parser.add_argument("--stats-time-aggregated", type=int, default=1)
     parser.add_argument("--skip-prefix-length", type=int, default=0)
     parser.add_argument("--dict-size", type=int, default=5000)
-
+    parser.add_argument("--recorded-dataset-size", type=int, default=10000000)
+    parser.add_argument("--wait-time-ms", type=int, default=0)
+    parser.add_argument("--code-version", type=str, default="undefined")
     args = parser.parse_args()
 
     print("Stats-collector waiting", file=sys.stderr)
@@ -54,7 +56,8 @@ if __name__ == "__main__":
     else:
         benchmark_kind = "unaware"
 
-    instance_name = "{}/{}-{}-{}-{}-{}-{}-{}-{}".format(
+    # instance prefix describes the code that is tested
+    instance_prefix = "{}/{}-{}-{}-{}-{}-{}-{}-{}-{}".format(
         args.engine_type,
         args.type,
         time.time(),
@@ -64,6 +67,15 @@ if __name__ == "__main__":
         args.batch_size,
         args.rate_per_second,
         benchmark_kind,
+        args.code_version,
+    )
+
+    # instance suffix describes the details of dataset and streaming configuration
+    instance_suffix = "{}-{}-{}-{}".format(
+        args.dict_size,
+        args.skip_prefix_length,
+        args.wait_time_ms,
+        args.recorded_dataset_size,
     )
 
     cargo_run_command_f = (
@@ -72,20 +84,20 @@ if __name__ == "__main__":
         + "--stats-timeline {3} "
         + "--stats-pathway-ptime-aggregated {4} "
         + "--stats-time-aggregated {5} "
-        + "--skip-prefix-length {6} "
-        + "--dict-size {7}"
+        + "--instance-suffix {6} "
+        + "--skip-prefix-length {7} "
     )
 
     cargo_run_command = cargo_run_command_f.format(
         args.type + "_stats_collector",
-        instance_name,
+        instance_prefix,
         args.stats_short,
         args.stats_timeline,
         args.stats_pathway_ptime_aggregated,
         args.stats_time_aggregated,
+        instance_suffix,
         args.skip_prefix_length,
-        args.dict_size,
     )
 
-    print("Instance name:", instance_name)
+    print(f"Instance name: {instance_prefix}-{instance_suffix}")
     calculate_stats(cargo_run_command)

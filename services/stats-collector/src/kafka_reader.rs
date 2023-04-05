@@ -120,6 +120,7 @@ impl KafkaReader {
         }
         let read_duration = read_start.elapsed();
         eprintln!("Time to read from Kafka {read_duration:?}");
+        timeline.sort_by(|a, b| a.timestamp.cmp(&b.timestamp));
 
         timeline
     }
