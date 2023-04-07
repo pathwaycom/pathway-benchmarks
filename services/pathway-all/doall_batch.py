@@ -6,7 +6,9 @@ BASE_LAUNCH_COMMAND = "taskset --cpu-list {} python main.py --type pagerank --au
 
 
 def taskset_string(cpu_pool, n_cpus):
-    return ",".join(str(cpu_id) for cpu_id in cpu_pool[:n_cpus])
+    return ",".join(
+        str(cpu_id) for cpu_id in cpu_pool[: min(n_cpus + 1, len(cpu_pool))]
+    )
 
 
 def parse_args_list(raw_repr):
@@ -26,6 +28,7 @@ if __name__ == "__main__":
 
     os.environ["PATHWAY_YOLO_RARE_WAKEUPS"] = "1"
     os.environ["PATHWAY_PROFILE"] = "release"
+    os.environ["PATHWAY_IGNORE_ASSERTS"] = "1"
 
     available_core_ids = parse_args_list(args.available_core_ids)
     n_cores_to_test = parse_args_list(args.n_cores_to_test)
