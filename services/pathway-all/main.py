@@ -41,7 +41,7 @@ class PagerankBenchmark(Benchmark):
 
     def get_input_table(self):
         if self._channel == "fs":
-            return pw.jsonlines.read(
+            return pw.io.jsonlines.read(
                 path=self._input_filename,
                 mode="static",
                 primary_key=None,
@@ -66,21 +66,21 @@ class PagerankBenchmark(Benchmark):
         )
         print("Launching pagerank with {} steps...".format(self.pagerank_steps))
         result = pagerank(edges, self.pagerank_steps)
-        pw.null.write(result)
+        pw.io.null.write(result)
         pw.run()
 
 
 class WordcountBenchmark(Benchmark):
     def get_input_table(self):
         if self._channel == "fs":
-            return pw.jsonlines.read(
+            return pw.io.jsonlines.read(
                 path=self._input_filename,
                 poll_new_objects=False,
                 primary_key=None,
                 value_columns=["word"],
             )
         elif self._channel == "kafka":
-            return pw.kafka.read(
+            return pw.io.kafka.read(
                 rdkafka_settings=self.get_rdkafka_settings(),
                 topic_names=["test_0"],
                 format="json",
@@ -92,9 +92,9 @@ class WordcountBenchmark(Benchmark):
 
     def output_table(self, table):
         if self._channel == "fs":
-            return pw.null.write(table)
+            return pw.io.null.write(table)
         elif self._channel == "kafka":
-            return pw.kafka.write(
+            return pw.io.kafka.write(
                 table,
                 rdkafka_settings=self.get_rdkafka_settings(),
                 topic_name="test_1",
