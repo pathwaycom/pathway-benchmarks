@@ -43,7 +43,7 @@ class PagerankBenchmark(Benchmark):
         if self._channel == "fs":
             return pw.jsonlines.read(
                 path=self._input_filename,
-                poll_new_objects=False,
+                mode="static",
                 primary_key=None,
                 value_columns=["u", "v"],
                 types={
