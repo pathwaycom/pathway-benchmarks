@@ -24,6 +24,8 @@ fun main() {
         put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().javaClass)
         put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().javaClass)
         put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, config.autoCommitFrequency)
+        put(StreamsConfig.NUM_STREAM_THREADS_CONFIG, config.numStreamThreads)
+
     }
 
     val builder = when (config.benchmarkType) {

@@ -6,7 +6,7 @@ from functools import partial
 
 throughputs = [x for x in range(200000, 1200001, 100000)]
 pw_throughputs = [x for x in range(200000, 1200001, 100000)]
-pw_batch_size_ms = [20, 100]
+pw_batch_size_ms = [5, 10, 20, 100]
 batch_size_ms = [20, 100]
 
 dict_sizes = [5000]
@@ -18,14 +18,14 @@ STREAMER_WAIT_TIME_MS = 25000
 STREAMER_EMIT_INTERVAL_MS = 8
 
 
-REPS = 1
+REPS = 3
 non_batched_engines = ["flink"]
 # non_batched_engines = []  # type:ignore
 batched_engines = ["flink_minibatching", "kstreams", "spark"]
 # batched_engines = []  # type:ignore
 pw_engines = ["pathway"]
 
-cores = [2, 4]
+cores = [1, 2, 4]
 
 tested_cpu_map = {
     1: "0",
@@ -158,10 +158,28 @@ def main():
             subprocess.Popen(cp_cmd, shell=True).wait()
 
             iterate_over_runs(
-                (dict_size_pref + up_command_template).format,
+                (
+                    "PATHWAY_YOLO_RARE_WAKEUPS=1 "
+                    + dict_size_pref
+                    + up_command_template
+                ).format,
                 down_command,
                 res_command,
                 [pw_engines, pw_throughputs, pw_batch_size_ms, cores],
+            )
+
+            iterate_over_runs(
+                (dict_size_pref + up_command_template).format,
+                down_command,
+                res_command,
+                [batched_engines, throughputs, batch_size_ms, cores],
+            )
+
+            iterate_over_runs(
+                (dict_size_pref + up_command_template).format,
+                down_command,
+                res_command,
+                [non_batched_engines, throughputs, [1], cores],
             )
 
 

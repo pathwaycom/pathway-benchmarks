@@ -25,13 +25,15 @@ object App
 
     def main(args: Array[String])
     {
-        def nextArg(map: Map[String, Any], list: List[String]): Map[String, Any] = {
+        def nextArg(map: Map[String, Int], list: List[String]): Map[String, Int] = {
             list match {
             case Nil => map
             case "--commit_interval" :: value :: tail =>
                 nextArg(map ++ Map("commit_interval" -> value.toInt), tail)
+            case "--parallelism" :: value :: tail =>
+                nextArg(map ++ Map("parallelism" -> value.toInt), tail)    
             case string :: Nil =>
-                nextArg(map ++ Map("filename" -> string), list.tail)
+                nextArg(map ++ Map("filename" -> 0), list.tail)
             case unknown :: _ =>
                 throw new Exception("Unknown option " + unknown)
                 
@@ -40,17 +42,17 @@ object App
 
         val options = nextArg(Map(), args.toList)
         val pTime = options("commit_interval")
-
+        val parallelism : Int = options("parallelism")
         // val config = new Configuration();
         // config.setString("taskmanager.memory.network.min", "6 Gb")
         // config.setString("taskmanager.memory.network.fraction", "1") 
 
         // val env = new LocalStreamEnvironment(config)
-        val env = StreamExecutionEnvironment.createLocalEnvironment(1)
+        val env = StreamExecutionEnvironment.createLocalEnvironment(parallelism)
 
         // val env = StreamExecutionEnvironment.getExecutionEnvironment
         // env.setRuntimeMode(RuntimeExecutionMode.BATCH);
-        env.setMaxParallelism(1)
+        env.setMaxParallelism(parallelism)
 
         // var configuration = env.getConfig
         // configuration.setString("table.exec.mini-batch.enabled", "true")

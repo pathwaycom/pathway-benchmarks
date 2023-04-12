@@ -31,6 +31,8 @@ object App
             case Nil => map
             case "--commit_interval" :: value :: tail =>
                 nextArg(map ++ Map("commit_interval" -> value.toInt), tail)
+            case "--parallelism" :: value :: tail =>
+                nextArg(map ++ Map("parallelism" -> value.toInt), tail)    
             case string :: Nil =>
                 nextArg(map ++ Map("filename" -> string), list.tail)
             case unknown :: _ =>
@@ -41,9 +43,8 @@ object App
 
         val options = nextArg(Map(), args.toList)
         val pTime = options("commit_interval")
+        val parallelism = options("parallelism")
 
-        val env = StreamExecutionEnvironment.createLocalEnvironment(1)
-        env.setMaxParallelism(1)
 
         val settings = EnvironmentSettings
         .newInstance()
@@ -69,6 +70,7 @@ object App
         )
 
         var configuration = tableEnv.getConfig
+        configuration.set("table.exec.resource.default-parallelism", s"${parallelism}")
         configuration.set("table.exec.mini-batch.enabled", "true")
         configuration.set("table.exec.mini-batch.allow-latency", s"${pTime} ms")
         configuration.set("table.exec.mini-batch.size", "20000")

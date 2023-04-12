@@ -12,4 +12,4 @@ RUN pip install --no-cache-dir --upgrade -r /pathway-all/requirements.txt --extr
 COPY ./main.py /pathway-all/main.py
 # CMD python main.py --type $BENCHMARK_TYPE --autocommit-frequency-ms $AUTOCOMMIT_FREQUENCY_MS
 # CMD py-spy --version
-CMD python main.py --type $BENCHMARK_TYPE --autocommit-frequency-ms $AUTOCOMMIT_FREQUENCY_MS
+CMD pathway spawn --threads $CORES python main.py --type $BENCHMARK_TYPE --autocommit-frequency-ms $AUTOCOMMIT_FREQUENCY_MS

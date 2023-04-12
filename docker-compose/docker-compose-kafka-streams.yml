@@ -25,9 +25,12 @@ services:
   kafka-streams-benchmark:
     cpuset: $TESTED_CPU_SET
     build: ../services/kafka-streams
+    deploy:
+      replicas: $WORKERS
     depends_on:
       kafka:
         condition: service_healthy
     environment:
       - AUTOCOMMIT_FREQUENCY_MS
       - BENCHMARK_TYPE
+      - CORES
