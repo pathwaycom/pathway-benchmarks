@@ -6,9 +6,7 @@ BASE_LAUNCH_COMMAND = "taskset --cpu-list {} python main.py --type pagerank --au
 
 
 def taskset_string(cpu_pool, n_cpus):
-    return ",".join(
-        str(cpu_id) for cpu_id in cpu_pool[: min(n_cpus + 1, len(cpu_pool))]
-    )
+    return ",".join(str(cpu_id) for cpu_id in cpu_pool[: min(n_cpus, len(cpu_pool))])
 
 
 def parse_args_list(raw_repr):
