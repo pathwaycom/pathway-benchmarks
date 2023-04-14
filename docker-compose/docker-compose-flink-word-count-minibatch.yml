@@ -14,20 +14,17 @@ services:
       service: streamer-common
     
     depends_on:
-      flink-wordcount-worker:
+      flink-wordcount:
         condition: service_started
-      flink-wordcount-taskmanager:
-        condition: service_started
-
+      
   stats-collector:
     extends:
       file: common-services.yml
       service: stats-collector-common
 
-  flink-wordcount-taskmanager:
+  flink-wordcount:
     cpuset: $TESTED_CPU_SET
-    build: ../services/flink-word-count-scala-minibatch
-    command: taskmanager --job-classname App --commit_interval ${AUTOCOMMIT_FREQUENCY_MS}
+    build: ../services/flink-word-count-minibatch
     depends_on:
       kafka:
         condition: service_healthy
@@ -44,42 +41,8 @@ services:
       - STATS_PATHWAY_PTIME_AGGREGATED
       - |
         FLINK_PROPERTIES=
-        taskmanager.rpc.address: flink-wordcount-taskmanager
-        jobmanager.rpc.address: flink-wordcount-worker
         taskmanager.memory.process.size: 20G
         jobmanager.memory.process.size: 20G
         parallelism.default: 1
 
-  # taskmanager.memory.flink.size: 16G
-  # taskmanager.memory.task.heap.size: 8G
-
-  flink-wordcount-worker:
-    cpuset: $TESTED_CPU_SET
-    build: ../services/flink-word-count-scala-minibatch
-    command: standalone-job --job-classname App --commit_interval ${AUTOCOMMIT_FREQUENCY_MS}
-    depends_on:
-      kafka:
-        condition: service_healthy
-      flink-wordcount-taskmanager:
-        condition: service_started
-
-    environment:
-      - AUTOCOMMIT_FREQUENCY_MS
-      - BENCHMARK_TYPE
-      - COMMIT_FREQUENCY
-      - ENGINE_TYPE
-      - RATE_PER_SECOND
-      - CORES
-      - WORKERS
-      - STATS_SHORT
-      - STATS_TIMELINE
-      - STATS_PATHWAY_PTIME_AGGREGATED
-      - |
-        FLINK_PROPERTIES=
-        taskmanager.rpc.address: flink-wordcount-taskmanager
-        jobmanager.rpc.address: flink-wordcount-worker
-        taskmanager.memory.process.size: 20G
-        jobmanager.memory.process.size: 20G
-        parallelism.default: 1
-    # jobmanager.memory.task.heap.size: 16G
-    # jobmanager.memory.flink.size: 8G
+  

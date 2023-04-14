@@ -22,55 +22,13 @@ services:
       file: common-services.yml
       service: stats-collector-common
 
-  spark-master:  
-    cpuset: $TESTED_CPU_SET
-    build: ../services/spark-cluster/
-    deploy:
-      resources:
-        limits:
-          memory: 16G    
- 
-    depends_on:
-      - kafka
-    ports:
-      - "${SPARK_MASTER_UI_PORT}:8080"
-      - "${SPARK_MASTER_PORT}:7077"
-    environment:
-      - SPARK_LOCAL_IP=spark-master
-      - SPARK_WORKLOAD=master
-  
-  spark-worker:    
-    cpuset: $TESTED_CPU_SET
-    build: ../services/spark-cluster/
-    deploy:
-      replicas: ${WORKERS}
-      resources:
-        limits:
-          memory: 16G    
-
-    ports:
-      - "9000-9010:8080"
-      - "7000-7010:7000"
-    depends_on:
-      - spark-master
-      
-    environment:
-      - SPARK_MASTER=spark://spark-master:7077
-      - SPARK_WORKER_CORES=${CORES}
-      - SPARK_WORKER_MEMORY=16G
-      - SPARK_DRIVER_MEMORY=16G
-      - SPARK_EXECUTOR_MEMORY=16G
-      - SPARK_WORKLOAD=worker
-      - SPARK_LOCAL_IP=spark-worker
-
   spark-word-count:
-    cpuset: $TESTED_CPU_SET
-    build: 
-      context: ../services/spark-word-count/
-      dockerfile: Dockerfile-cluster
     depends_on:
-      - spark-worker
-      - spark-master
+      kafka: 
+        condition: service_healthy
+
+    cpuset: $TESTED_CPU_SET
+    build: ../services/spark-word-count/
     environment:
       - AUTOCOMMIT_FREQUENCY_MS
       - BENCHMARK_TYPE
@@ -78,3 +36,5 @@ services:
       - RATE_PER_SECOND
       - CORES
       - WORKERS
+         
+ 

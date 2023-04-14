@@ -1,13 +1,10 @@
-import os
-import signal
 import subprocess
-import time
 from functools import partial
 
-throughputs = [x for x in range(200000, 1200001, 100000)]
-pw_throughputs = [x for x in range(200000, 1200001, 100000)]
-pw_batch_size_ms = [5, 10, 20, 100]
-batch_size_ms = [20, 100]
+throughputs = [200000]
+pw_throughputs = [200000]
+pw_batch_size_ms = [100]
+batch_size_ms = [100]
 
 dict_sizes = [5000]
 
@@ -18,14 +15,12 @@ STREAMER_WAIT_TIME_MS = 25000
 STREAMER_EMIT_INTERVAL_MS = 8
 
 
-REPS = 3
+REPS = 1
 non_batched_engines = ["flink"]
-# non_batched_engines = []  # type:ignore
 batched_engines = ["flink_minibatching", "kstreams", "spark"]
-# batched_engines = []  # type:ignore
 pw_engines = ["pathway"]
 
-cores = [1, 2, 4]
+cores = [1]
 
 tested_cpu_map = {
     1: "0",
@@ -45,14 +40,14 @@ harness_cpu_map = {
 
 docker_compose_map = {
     "pathway": "pathway",
-    "flink": "flink-word-count-local",
-    "flink_minibatching": "flink-word-count-local-minibatch",
+    "flink": "flink-word-count",
+    "flink_minibatching": "flink-word-count-minibatch",
     "kstreams": "kafka-streams",
-    "spark": "spark-word-count-scala-local",
+    "spark": "spark-word-count",
 }
 
 
-def run_record(up_command, down_command, resources_stats_command):
+def run_record(up_command, down_command):
     # unwrap mappings from iterated values
     up_command = up_command.format(
         tested_cpu_map=tested_cpu_map,
@@ -61,15 +56,11 @@ def run_record(up_command, down_command, resources_stats_command):
         docker_compose_map=docker_compose_map,
     )
 
-    res = subprocess.Popen(resources_stats_command, shell=True, preexec_fn=os.setsid)
-
     run = subprocess.Popen(up_command, shell=True)
     run.wait()
 
     clean = subprocess.Popen(down_command, shell=True)
     clean.wait()
-
-    os.killpg(os.getpgid(res.pid), signal.SIGTERM)
 
 
 def fetch_commit_number():
@@ -90,15 +81,13 @@ def fetch_commit_number():
 # that happen on the outside, feed the recursive function partially set command
 
 
-def iterate_over_runs(partial_up_command, down_command, res_command, ranges):
+def iterate_over_runs(partial_up_command, down_command, ranges):
     if len(ranges) == 0:
-        return run_record(partial_up_command(), down_command, res_command)
+        return run_record(partial_up_command(), down_command)
     head, *tail = ranges
 
     for value in head:
-        iterate_over_runs(
-            partial(partial_up_command, value), down_command, res_command, tail
-        )
+        iterate_over_runs(partial(partial_up_command, value), down_command, tail)
 
 
 def main():
@@ -127,13 +116,6 @@ def main():
     )
     down_command = "docker-compose -p $USER down -v --remove-orphans"
 
-    subprocess.Popen("mkdir run_resources", shell=True)
-    res_command = (
-        "taskset -c 6 docker stats --format "
-        + '"table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}" '
-        + f"> run_resources/{time.time()}_service_stats_log.txt"
-    )
-
     # Below, we iterate over reps and dict-sizes outside of the function, as:
     # - reps do not go into the command (albeit one could add some comment at the end that
     # collects this kind of unused parameters, and it's fine to have them as outermost-loop
@@ -157,28 +139,25 @@ def main():
             cp_cmd = "cp ./wordcount-large.csv ../services/streamer/datasets/"
             subprocess.Popen(cp_cmd, shell=True).wait()
 
-            iterate_over_runs(
-                (
-                    "PATHWAY_YOLO_RARE_WAKEUPS=1 "
-                    + dict_size_pref
-                    + up_command_template
-                ).format,
-                down_command,
-                res_command,
-                [pw_engines, pw_throughputs, pw_batch_size_ms, cores],
-            )
+            # iterate_over_runs(
+            #     (
+            #         "PATHWAY_YOLO_RARE_WAKEUPS=1 "
+            #         + dict_size_pref
+            #         + up_command_template
+            #     ).format,
+            #     down_command,
+            #     [pw_engines, pw_throughputs, pw_batch_size_ms, cores],
+            # )
 
             iterate_over_runs(
                 (dict_size_pref + up_command_template).format,
                 down_command,
-                res_command,
                 [batched_engines, throughputs, batch_size_ms, cores],
             )
 
             iterate_over_runs(
                 (dict_size_pref + up_command_template).format,
                 down_command,
-                res_command,
                 [non_batched_engines, throughputs, [1], cores],
             )
 
