@@ -1,3 +1,7 @@
+"""
+Pathway pagerank implementation equivalent in Spark SQL.
+"""
+
 import csv
 import sys
 import time
@@ -24,7 +28,6 @@ t_start = time.time()
 
 edges = spark.read.json(filename).cache()
 
-# edges.select(sf.sum(edges["u"] * edges["v"])).show()
 in_vertices = (
     edges.select(edges["v"])
     .distinct()
@@ -75,11 +78,8 @@ for _ in range(iterations):
     )
 
 ranks.write.format("csv").save(f"/tmp/{uuid.uuid1()}")
-# res = ranks.collect()
 
 t_end = time.time()
 print(t_end - t_start)
-
-# save_tsv(res, f"results/sql_{iterations}_{os.path.basename(filename)}")
 
 spark.stop()

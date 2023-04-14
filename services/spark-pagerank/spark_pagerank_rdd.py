@@ -1,3 +1,7 @@
+"""
+Pathway pagerank implementation equivalent in Spark RDD.
+"""
+
 import csv
 import json
 import sys
@@ -29,7 +33,6 @@ filename = sys.argv[1]
 
 t_start = time.time()
 edges = sc.textFile(filename).map(parse_row_json).cache()
-# print(edges.map(lambda x: x[0] * x[1]).sum())
 in_vertices = edges.map(lambda edge: edge[1]).distinct().map(lambda u: (u, 0))
 out_vertices = edges.map(lambda edge: (edge[0], 1)).reduceByKey(add)
 degrees = in_vertices.union(out_vertices).reduceByKey(add)
@@ -60,11 +63,8 @@ for _ in range(iterations):
     ranks = inflows.mapValues(lambda rank: rank + 1_000)
 
 ranks.saveAsTextFile(f"/tmp/{uuid.uuid1()}")
-# res = ranks.collect()
 
 t_end = time.time()
 print(t_end - t_start)
-
-# save_tsv(res, f"results/{iterations}_{os.path.basename(filename)}")
 
 spark.stop()

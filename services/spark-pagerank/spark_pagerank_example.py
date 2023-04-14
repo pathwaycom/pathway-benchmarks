@@ -1,3 +1,7 @@
+"""
+Example pagerank implementation from the Spark docs.
+"""
+
 import csv
 import sys
 import time
