@@ -58,9 +58,7 @@ impl KafkaReader {
 
         let mut tpl = TopicPartitionList::new();
         for topic in metadata.topics() {
-            eprintln!("topic {}", topic.name());
             for partition in topic.partitions() {
-                eprintln!("topic {} has partition {}", topic.name(), partition.id());
                 tpl.add_partition_offset(topic.name(), partition.id(), Offset::Beginning)
                     .expect("Addition to TPL failed");
             }

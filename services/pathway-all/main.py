@@ -5,8 +5,8 @@ import sys
 import time
 from abc import ABC, abstractmethod
 
-import pathway as pw
-from pathway.stdlib.graphs.pagerank import pagerank
+import pathway as pw  # type:ignore
+from pathway.stdlib.graphs.pagerank import pagerank  # type:ignore
 
 
 class Benchmark(ABC):

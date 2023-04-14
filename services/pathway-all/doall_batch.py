@@ -37,17 +37,17 @@ if __name__ == "__main__":
     dataset_path = args.dataset_path
 
     for n_cpus in n_cores_to_test:
-        os.environ["PATHWAY_THREADS"] = str(n_cpus)
+        os.environ["PATHWAY_THREADS"] = str(n_cpus)  # Restict computational cores
         for n_steps in n_steps_to_test:
             command = BASE_LAUNCH_COMMAND.format(
                 taskset_string(available_core_ids, n_cpus),
                 dataset_path,
                 n_steps,
             )
-            args = command.split()
+            run_args = command.split()
 
             for n_repeat in range(n_repeats):
-                print("Executing...", args)
+                print("Executing...", run_args)
 
-                popen = subprocess.Popen(args, stdout=subprocess.PIPE)
+                popen = subprocess.Popen(run_args, stdout=subprocess.PIPE)
                 popen.wait()

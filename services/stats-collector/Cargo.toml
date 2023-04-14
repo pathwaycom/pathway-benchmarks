@@ -14,15 +14,3 @@ serde_json = "1.0.48"
 [[bin]]
 name = "wordcount_stats_collector"
 path = "src/wordcount_stats_collector.rs"
-
-[[bin]]
-name = "increment_stats_collector"
-path = "src/increment_stats_collector.rs"
-
-[[bin]]
-name = "kafka_io_record"
-path = "src/kafka_io_record.rs"
-
-[[bin]]
-name = "weighted_wordcount_stats_collector"
-path = "src/weighted_wordcount_stats_collector.rs"
