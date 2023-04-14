@@ -14,6 +14,7 @@ metadata_pref = [
     "throughput",
     "--",
     "version(code)",
+    "version(engine)",
 ]
 
 percentiles = [

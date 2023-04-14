@@ -24,7 +24,14 @@ services:
 
   pathway-all:
     cpuset: $TESTED_CPU_SET
-    build: ../services/pathway-all/
+    build:
+      context: ../../../
+      dockerfile: ./public/pathway-benchmarks/services/pathway-all/Dockerfile
+      args:
+        PUBLIC_PATHWAY_DIR: ${PUBLIC_PATHWAY}
+        THIRD_PARTY_DIR: ${THIRD_PARTY}
+        DOT_GIT_DIR: ${DOT_GIT}
+        LOCAL_BUILD_FLAG: ${LOCAL_BUILD}
     deploy:
       resources:
         limits:

@@ -14,6 +14,7 @@ columns = [
     "throughput",
     "--",
     "version(code)",
+    "version(engine)",
     "dict_size",
     "skip_prefix_length",
     "wait_time_ms",

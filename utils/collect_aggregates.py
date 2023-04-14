@@ -21,7 +21,7 @@ def main():
     )
 
     aggr_total.write(
-        "engine,benchmark,timestamp,workers,cores,batch_length_ms,_,throughput,_,version(code)"
+        "engine,benchmark,timestamp,workers,cores,batch_length_ms,_,throughput,_,version(code),version(engine)"
         + ",min,p01,p05,p10,p20,p30,p40,median,p60,p70,p80,p90,p95,p99,max,lost"
         + ",dict_size,skip_prefix_length,wait_time_ms,recorded_dataset_size\n"
     )
@@ -36,7 +36,7 @@ def main():
             "w+",
         ) as f:
             f.write(
-                "engine,benchmark,timestamp,workers,cores,batch_length_ms,_,throughput,_version(code)"
+                "engine,benchmark,timestamp,workers,cores,batch_length_ms,_,throughput,_version(code),version(engine)"
                 + ",min,p01,p05,p10,p20,p30,p40,median,p60,p70,p80,p90,p95,p99,max,lost"
                 + ",skip_prefix_length,wait_time_ms,recorded_dataset_size\n"
             )

@@ -9,13 +9,6 @@ services:
       interval: 10s
       timeout: 10s
       retries: 100
-    ports:
-      - 2181:2181
-    healthcheck:
-      test: [ "CMD", "nc", "-vz", "localhost", "2181" ]
-      interval: 10s
-      timeout: 10s
-      retries: 100
   kafka-common:
     cpuset: $HARNESS_CPU_SET
     image: wurstmeister/kafka

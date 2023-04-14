@@ -1,7 +1,8 @@
 mod kafka_reader;
 mod utils;
-
 use kafka_reader::{get_default_kafka_config, KafkaReader, TimeLineEntry};
+use std::fs::File;
+use std::io::{BufRead, BufReader};
 use utils::print_to_file;
 
 use serde::Deserialize;
@@ -142,7 +143,7 @@ fn aggregate_stats_for_batch(group: &mut dyn Iterator<Item = TimeLatency>) -> Ag
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let instance_prefix: String = args[1].to_string();
+    let instance_prefix_no_engine_version: String = args[1].to_string();
     let mut instance_suffix: String = "unknown".to_string();
     let mut print_short: bool = true;
     let mut print_timeline: bool = false;
@@ -162,6 +163,24 @@ fn main() {
             _ => eprintln!("unknown parameter {} ", args[i].as_str()),
         }
     }
+
+    // handle pw engine version;
+    let mut pw_version = "NA".to_string();
+    if instance_prefix_no_engine_version.contains("pathway") {
+        let file = File::open("results/pw-version.txt").unwrap();
+        let mut string_line = "pathway, version UNKNOWN".to_string();
+        for line in BufReader::new(file).lines() {
+            string_line = line.unwrap().to_string();
+            eprintln!("{}", string_line);
+        }
+        let from_file = string_line.clone();
+        pw_version = string_line
+            .strip_prefix("pathway, version ")
+            .unwrap_or(&format!("local.{}", &from_file))
+            .to_string();
+    }
+
+    let instance_prefix = format!("{}-{}", &instance_prefix_no_engine_version, &pw_version);
 
     let metadata_pref = instance_prefix.replace(['/', '-'], ",");
     let metadata_suff = instance_suffix.replace(['-'], ",");
