@@ -24,7 +24,7 @@ Normally, only one file is required for running Pathway, which is `docker-compos
 
 For other systems, there is usually a file for one pair of the benchmarked system and benchmark.
 
-Since in benchmarks we basically want to compare multiple runs of one system with multiple runs of other systems, we need to run these docker-compose images several times. There is a `run_all.py` file in the directory for doing that in automated mode.
+Since in benchmarks we basically want to compare multiple runs of one system with multiple runs of other systems, we need to run these docker-compose images several times. There is a `run_wordcount.py` file in the directory for doing that in automated mode.
 
 ### `services`
 
@@ -37,4 +37,8 @@ Some services are dedicated to running a benchmark in a specific system. For ins
 
 - `pathway-all`, implementing Wordcount and Pagerank benchmarks in Pathway. This directory also contains the Python script for running Pagerank benchmark in Python;
 - `flink-pagerank`, implementing batch scenario of Pagerank in Flink;
-- `flink-pagerank-streaming`, implementation streaming scenario of Pagerank in Flink.
+- `flink-pagerank-streaming`, implementing streaming scenario of Pagerank in Flink;
+- `spark-pagerank-graphx`, implementing Pagerank in Spark GraphX;
+- `spark-pagerank`, implementing Pagerank in Spark (without the usage of GraphX);
+- `flink-word-count` and `flink-word-count-minibatch`, implementing two various versions of Wordcount in Flink;
+- `spark-word-count`, implementing Wordcount in Spark.
