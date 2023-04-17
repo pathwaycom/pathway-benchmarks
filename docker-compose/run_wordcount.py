@@ -1,10 +1,10 @@
 import subprocess
 from functools import partial
 
-throughputs = [200000]
-pw_throughputs = [200000]
-pw_batch_size_ms = [100]
-batch_size_ms = [100]
+throughputs = [x for x in range(200000, 800001, 100000)]
+pw_throughputs = [x for x in range(200000, 800001, 100000)]
+pw_batch_size_ms = [20, 100]
+batch_size_ms = [20, 100]
 
 dict_sizes = [5000]
 
@@ -20,7 +20,7 @@ non_batched_engines = ["flink"]
 batched_engines = ["flink_minibatching", "kstreams", "spark"]
 pw_engines = ["pathway"]
 
-cores = [1]
+cores = [1, 2, 4]
 
 tested_cpu_map = {
     1: "0",
@@ -139,15 +139,15 @@ def main():
             cp_cmd = "cp ./wordcount-large.csv ../services/streamer/datasets/"
             subprocess.Popen(cp_cmd, shell=True).wait()
 
-            # iterate_over_runs(
-            #     (
-            #         "PATHWAY_YOLO_RARE_WAKEUPS=1 "
-            #         + dict_size_pref
-            #         + up_command_template
-            #     ).format,
-            #     down_command,
-            #     [pw_engines, pw_throughputs, pw_batch_size_ms, cores],
-            # )
+            iterate_over_runs(
+                (
+                    "PATHWAY_YOLO_RARE_WAKEUPS=1 "
+                    + dict_size_pref
+                    + up_command_template
+                ).format,
+                down_command,
+                [pw_engines, pw_throughputs, pw_batch_size_ms, cores],
+            )
 
             iterate_over_runs(
                 (dict_size_pref + up_command_template).format,
