@@ -1,0 +1,3 @@
+docker-compose.yml
+datasets/soc-LiveJournal1.txt
+datasets/pagerank-*.json

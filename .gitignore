@@ -1,0 +1,7 @@
+services/streamer/.dataset-tmp
+services/streamer/.dataset-tmp-output
+services/streamer/datasets/wordcount-large.csv
+services/streamer/datasets/pagerank.tsv
+docker-compose/results
+services/streamer/datasets/pagerank.json
+utils/*.png

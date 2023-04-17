@@ -1,0 +1,36 @@
+version: "3.8"
+services:
+  zookeeper:
+    extends:
+      file: common-services.yml
+      service: zookeeper-common
+  kafka:
+    extends:  
+      file: common-services.yml
+      service: kafka-common
+  streamer:
+    extends:
+      file: common-services.yml
+      service: streamer-common
+    
+    depends_on:
+      kafka-streams-benchmark:
+        condition: service_started
+      
+  stats-collector:
+    extends:
+      file: common-services.yml
+      service: stats-collector-common
+
+  kafka-streams-benchmark:
+    cpuset: $TESTED_CPU_SET
+    build: ../services/kafka-streams
+    deploy:
+      replicas: $WORKERS
+    depends_on:
+      kafka:
+        condition: service_healthy
+    environment:
+      - AUTOCOMMIT_FREQUENCY_MS
+      - BENCHMARK_TYPE
+      - CORES
