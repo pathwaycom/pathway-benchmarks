@@ -15,7 +15,7 @@ RUN echo "remote build" \
 
 COPY ./services/pathway-all/main.py /pathway-all/main.py
 
-CMD echo $(pathway --version) > /pathway-all/results/pw-version.txt; \
+CMD echo $(pathway --version) > /pathway-all/results/pw-version.txt \
     && pathway spawn \
         --threads $CORES python main.py \
         --type $BENCHMARK_TYPE \
