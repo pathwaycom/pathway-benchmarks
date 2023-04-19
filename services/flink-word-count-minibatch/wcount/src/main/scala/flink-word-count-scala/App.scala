@@ -19,7 +19,6 @@ import org.apache.flink.table.api._
 import org.apache.flink.streaming.api.scala._
 
 import org.apache.flink.api.scala.ExecutionEnvironment
-// import org.apache.flink.streaming.api.environment.RemoteStreamEnvironment
 
 object App
 {
@@ -45,15 +44,19 @@ object App
         val pTime = options("commit_interval")
         val parallelism = options("parallelism")
 
-
-        val settings = EnvironmentSettings
-        .newInstance()
-        .inStreamingMode()
-        // .inBatchMode()
-        .build()
+        val configuration = new Configuration;
+        configuration.setString("table.exec.resource.default-parallelism", s"${parallelism}")
+        configuration.setString("table.exec.mini-batch.enabled", "true")
+        configuration.setString("table.exec.mini-batch.allow-latency", s"${pTime} ms")
+        configuration.setString("table.exec.mini-batch.size", "20000")
+        configuration.setString("table.optimizer.agg-phase-strategy", "TWO_PHASE"); 
+        configuration.setString("table.optimizer.incremental-agg-enabled", "true");
+        configuration.setString("pipeline-object-reuse","true");
+        
+        val settings = EnvironmentSettings.newInstance
+        .inStreamingMode.withConfiguration(configuration).build
 
         val tableEnv = TableEnvironment.create(settings)
-
         val table = tableEnv.createTemporaryTable("words", TableDescriptor.forConnector("kafka")
             .schema(
                 Schema.newBuilder()
@@ -67,15 +70,7 @@ object App
             .option("properties.bootstrap.servers", "kafka:9092")
             .format("json")
             .build()
-        )
-
-        var configuration = tableEnv.getConfig
-        configuration.set("table.exec.resource.default-parallelism", s"${parallelism}")
-        configuration.set("table.exec.mini-batch.enabled", "true")
-        configuration.set("table.exec.mini-batch.allow-latency", s"${pTime} ms")
-        configuration.set("table.exec.mini-batch.size", "20000")
-        configuration.set("table.optimizer.agg-phase-strategy", "TWO_PHASE"); 
-        configuration.set("table.optimizer.incremental-agg-enabled", "true");
+        )        
 
         val sinkTable = tableEnv.createTemporaryTable("sink", TableDescriptor.forConnector("upsert-kafka")
             .schema(

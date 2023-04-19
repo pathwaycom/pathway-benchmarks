@@ -13,11 +13,8 @@ import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.formats.json.JsonRowDeserializationSchema
 import org.apache.flink.formats.json.JsonRowDeserializationSchema.Builder
 
-
-
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.api.scala.ExecutionEnvironment
-// import org.apache.flink.streaming.api.environment.RemoteStreamEnvironment
 
 
 object App
@@ -43,28 +40,13 @@ object App
         val options = nextArg(Map(), args.toList)
         val pTime = options("commit_interval")
         val parallelism : Int = options("parallelism")
-        // val config = new Configuration();
-        // config.setString("taskmanager.memory.network.min", "6 Gb")
-        // config.setString("taskmanager.memory.network.fraction", "1") 
-
-        // val env = new LocalStreamEnvironment(config)
         val env = StreamExecutionEnvironment.createLocalEnvironment(parallelism)
-
-        // val env = StreamExecutionEnvironment.getExecutionEnvironment
-        // env.setRuntimeMode(RuntimeExecutionMode.BATCH);
         env.setMaxParallelism(parallelism)
-
-        // var configuration = env.getConfig
-        // configuration.setString("table.exec.mini-batch.enabled", "true")
-        // configuration.setString("table.exec.mini-batch.allow-latency", "20 ms")
-
-
-        // val env = new RemoteStreamEnvironment("flink-wordcount-taskmanager", 3456, config, "wcount-1.0-SNAPSHOT.jar")
-        // val env = ExecutionEnvironment.getExecutionEnvironment()
+        var configuration = env.getConfig
+        configuration.enableObjectReuse()
+ 
         val names = Array("word")
-
         val jsonDes =  new JsonRowDeserializationSchema(Types.ROW_NAMED(names ,Types.STRING))
-        // val deserializer = KafkaRecordDeserializationSchema.valueOnly(jsonDes)
 
         val kafkaSource = KafkaSource.builder()
         .setBootstrapServers("kafka:9092")
