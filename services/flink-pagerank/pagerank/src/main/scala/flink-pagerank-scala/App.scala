@@ -34,10 +34,15 @@ object App
 
         val configuration = new Configuration;
         configuration.setString("table.exec.resource.default-parallelism", s"${parallelism}")
-        configuration.setString("taskmanager.memory.managed.size", "10G")
+        configuration.setString("taskmanager.cpu.cores", s"${parallelism}")
+        configuration.setString("taskmanager.memory.managed.size", "20G")
+        configuration.setString("taskmanager.memory.network.max", "1G");
+
 
         configuration.setString("metrics.reporter.slf4j.factory.class", "org.apache.flink.metrics.slf4j.Slf4jReporterFactory")
         configuration.setString("metrics.reporter.slf4j.interval", "5 SECONDS")
+
+        configuration.setString("pipeline.object-reuse", "true");
 
         val env = StreamExecutionEnvironment.createLocalEnvironment(1, configuration)
 

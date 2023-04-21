@@ -19,12 +19,12 @@ if __name__ == "__main__":
                 job_jvm_heap_used
                 + job_jvm_nonheap_used
                 + flink_managed_used
-                + task_jvm_heap_used
-                + task_jvm_nonheap_used
+                # + task_jvm_heap_used
+                # + task_jvm_nonheap_used
+                # task_* seems to be the same as job_* in a local execution mode
             )
             sum_gb = sum / (1024**3)
             summed_used_memory_readouts.append(sum)
-
             job_jvm_heap_used = 0
             job_jvm_nonheap_used = 0
             flink_managed_used = 0

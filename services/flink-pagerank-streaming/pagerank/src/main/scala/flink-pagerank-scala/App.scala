@@ -46,7 +46,7 @@ object App
         val configuration = new Configuration;
         configuration.setString("table.exec.resource.default-parallelism", s"${parallelism}")
         configuration.setString("taskmanager.cpu.cores", s"${parallelism}")
-        configuration.setString("taskmanager.memory.managed.size", "20G")
+        configuration.setString("taskmanager.memory.managed.size", "10G")
         configuration.setString("taskmanager.memory.network.max", "1G");
 
         configuration.setString("metrics.reporter.slf4j.factory.class", "org.apache.flink.metrics.slf4j.Slf4jReporterFactory")
@@ -58,7 +58,9 @@ object App
         
         configuration.setString("table.optimizer.agg-phase-strategy", "TWO_PHASE"); 
         configuration.setString("table.optimizer.incremental-agg-enabled", "true");
-
+        
+        configuration.setString("pipeline.object-reuse", "true");
+        
         val env = StreamExecutionEnvironment.createLocalEnvironment(1, configuration)
         env.setRuntimeMode(RuntimeExecutionMode.STREAMING)
         

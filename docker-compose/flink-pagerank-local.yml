@@ -3,15 +3,6 @@ services:
   flink-pagerank:
     cpuset: $TESTED_CPU_SET
     build: ../services/flink-pagerank
-    command: java -cp /opt/flink/lib/*:/opt/flink/usrlib/pagerank-1.0-SNAPSHOT-jar-with-dependencies.jar App --pagerank_iterations ${PAGERANK_ITERATIONS} --input ${INPUT_FILENAME} --parallelism ${PARALLELISM}
-    environment:
-      - CORES
-      - WORKERS
-      - |
-        FLINK_PROPERTIES=
-        metrics.reporter.slf4j.factory.class: org.apache.flink.metrics.slf4j.Slf4jReporterFactory
-        metrics.reporter.slf4j.interval: 5 SECONDS
-        taskmanager.memory.managed.size: 10G
-        parallelism.default: 1
+    command: java -Xmx100g -cp /opt/flink/lib/*:/opt/flink/usrlib/pagerank-1.0-SNAPSHOT-jar-with-dependencies.jar App --pagerank_iterations ${PAGERANK_ITERATIONS} --input ${INPUT_FILENAME} --parallelism ${PARALLELISM}
     volumes:
       - ../services/flink-pagerank/pagerank:/app
