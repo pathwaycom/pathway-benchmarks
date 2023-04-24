@@ -9,7 +9,7 @@ def squash_aggregates(metadata, file_location):
         ret += f",{data}"
 
     m_cols = metadata.split(",")
-    return f"{','.join(m_cols[:10])}{ret},{','.join(m_cols[10:])}\n"
+    return f"{','.join(m_cols[:11])}{ret},{','.join(m_cols[11:])}\n"
 
 
 def main():
