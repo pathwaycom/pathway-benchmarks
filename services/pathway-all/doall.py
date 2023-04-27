@@ -1,8 +1,21 @@
 import argparse
 import os
+import platform
 import subprocess
+import warnings
 
-BASE_LAUNCH_COMMAND = "taskset --cpu-list {} python main.py --type pagerank --autocommit-frequency-ms 1000000000 --channel fs --input-filename {} --pagerank-steps {}"  # noqa: E501
+LINUX_LAUNCH_COMMAND = "taskset --cpu-list {} python main.py --type pagerank --autocommit-frequency-ms 1000000000 --channel fs --input-filename {} --pagerank-steps {}"  # noqa: E501
+OTHER_LAUNCH_COMMAND = "python main.py --type pagerank --autocommit-frequency-ms 1000000000 --channel fs --input-filename {} --pagerank-steps {}"  # noqa: E501
+
+
+def get_launch_command(cpu_list, input_filename, pagerank_steps):
+    if platform.system() != "Linux":
+        warnings.warn(
+            "The OS is not Linux, unable to restrict used CPU cores to a certain set"
+        )
+        return OTHER_LAUNCH_COMMAND.format(input_filename, pagerank_steps)
+    else:
+        return LINUX_LAUNCH_COMMAND.format(cpu_list, input_filename, pagerank_steps)
 
 
 def taskset_string(cpu_pool, n_cpus):
@@ -37,7 +50,7 @@ if __name__ == "__main__":
     for n_cpus in n_cores_to_test:
         os.environ["PATHWAY_THREADS"] = str(n_cpus)  # Restict computational cores
         for n_steps in n_steps_to_test:
-            command = BASE_LAUNCH_COMMAND.format(
+            command = get_launch_command(
                 taskset_string(available_core_ids, n_cpus),
                 dataset_path,
                 n_steps,

@@ -35,7 +35,7 @@ services:
       test: [ "CMD", "nc", "-vz", "localhost", "9092" ]
       interval: 10s
       timeout: 10s
-      retries: 10
+      retries: 100
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
   streamer-common:
