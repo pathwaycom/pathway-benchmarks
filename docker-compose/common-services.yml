@@ -1,5 +1,5 @@
 services:
-  zookeeper-common:
+  zookeeper:
     cpuset: $HARNESS_CPU_SET
     image: wurstmeister/zookeeper
     ports:
@@ -9,7 +9,7 @@ services:
       interval: 10s
       timeout: 10s
       retries: 100
-  kafka-common:
+  kafka:
     cpuset: $HARNESS_CPU_SET
     image: wurstmeister/kafka
     ports:

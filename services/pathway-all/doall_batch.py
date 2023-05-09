@@ -2,7 +2,7 @@ import argparse
 import os
 import subprocess
 
-BASE_LAUNCH_COMMAND = "taskset --cpu-list {} python main.py --type pagerank --autocommit-frequency-ms 1000000000 --channel fs --input-filename {} --pagerank-steps {}"  # noqa: E501
+BASE_LAUNCH_COMMAND = "python main.py --type pagerank --autocommit-frequency-ms 1000000000 --channel fs --input-filename {} --pagerank-steps {}"  # noqa: E501
 
 
 def taskset_string(cpu_pool, n_cpus):
@@ -38,7 +38,6 @@ if __name__ == "__main__":
         os.environ["PATHWAY_THREADS"] = str(n_cpus)  # Restict computational cores
         for n_steps in n_steps_to_test:
             command = BASE_LAUNCH_COMMAND.format(
-                taskset_string(available_core_ids, n_cpus),
                 dataset_path,
                 n_steps,
             )
