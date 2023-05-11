@@ -1,12 +1,43 @@
 import argparse
 import os
+import pathlib
 import resource
+import subprocess
 import sys
 import time
 from abc import ABC, abstractmethod
 
 import pathway as pw  # type:ignore
 from pathway.stdlib.graphs.pagerank import pagerank  # type:ignore
+
+
+def get_git_commit(path):
+    try:
+        git = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"],
+            capture_output=True,
+            cwd=path,
+            text=True,
+            check=True,
+        )
+        return git.stdout.strip()
+    except Exception:
+        return None
+
+
+def display_path_and_version(name, path):
+    sys.stderr.write(f"{name} path: {path}\n")
+    parent = pathlib.Path(path).parent
+    commit = get_git_commit(parent)
+    if commit is not None:
+        sys.stderr.write(f"{name} commit: {commit}\n")
+
+
+def display_paths_and_versions():
+    display_path_and_version("Benchmark code", __file__)
+    display_path_and_version("Pathway", pw.__file__)
+    display_path_and_version("Pathway engine", pw.engine.__file__)
+    sys.stderr.write(f"Pathway package version: {pw.__version__}\n")
 
 
 class Benchmark(ABC):
@@ -123,6 +154,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     autocommit_frequency = args.autocommit_frequency_ms or None
+
+    display_paths_and_versions()
 
     if args.type == "wordcount":
         benchmark: Benchmark = WordcountBenchmark(
