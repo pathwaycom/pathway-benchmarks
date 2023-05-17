@@ -44,7 +44,7 @@ metadata_suff = [
 ]
 columns = metadata_pref + percentiles + metadata_suff
 
-results_dir, *file_tree_listed = os.walk("../docker-compose/results/")
+results_dir, *file_tree_listed = os.walk("../results/")
 
 batch_sizes = [5, 10, 20, 50]
 
@@ -54,7 +54,7 @@ for (dir_path, dir_names, file_names) in file_tree_listed:
     print(file_names)
 
     collected_aggregates = pd.read_csv(
-        f"../docker-compose/results/{engine}/aggregated-aggregates.csv",
+        f"../results/{engine}/aggregated-aggregates.csv",
         names=columns,
         header=None,
         skiprows=1,

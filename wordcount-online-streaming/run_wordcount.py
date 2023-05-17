@@ -3,6 +3,7 @@ from functools import partial
 
 throughputs = [x for x in range(200000, 800001, 100000)]
 pw_throughputs = [x for x in range(200000, 800001, 100000)]
+
 pw_batch_size_ms = [20, 100]
 batch_size_ms = [20, 100]
 
@@ -110,8 +111,8 @@ def main():
         + "TESTED_CPU_SET={{tested_cpu_map[{3}]}} "
         + "HARNESS_CPU_SET={{harness_cpu_map[{3}]}} "
         + "docker-compose -p $USER "
-        + "--env-file variables_ext.env "
-        + "-f docker-compose-{{docker_compose_map[{0}]}}.yml "
+        + "--env-file docker-compose/variables_ext.env "
+        + "-f docker-compose/docker-compose-{{docker_compose_map[{0}]}}.yml "
         + "up stats-collector> {0}_log.txt>&1 --build"
     )
     down_command = "docker-compose -p $USER down -v --remove-orphans"
@@ -130,13 +131,14 @@ def main():
 
             dict_size_pref = f"DICT_SIZE={dsize} "
             testgen_cmd = (
-                "python ../services/streamer/datasets/wordcount-large-gen.py "
+                "python datasets/wordcount-large-gen.py "
                 + f"--dict-size {dsize} "
                 + f"--dataset-size {DATASET_WARMUP_PREFIX_LENGTH + RECORDED_DATASET_SIZE}"
             )
             subprocess.Popen(testgen_cmd, shell=True).wait()
-
-            cp_cmd = "cp ./wordcount-large.csv ../services/streamer/datasets/"
+            mkdir_cmd = "mkdir -p ./services/streamer/datasets"
+            cp_cmd = "cp ./datasets/wordcount-large.csv ./services/streamer/datasets/"
+            subprocess.Popen(mkdir_cmd, shell=True).wait()
             subprocess.Popen(cp_cmd, shell=True).wait()
 
             iterate_over_runs(

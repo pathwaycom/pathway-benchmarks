@@ -2,7 +2,7 @@ import os
 
 
 def squash_aggregates(metadata, file_location):
-    f = open(f"../docker-compose/results/{file_location}")
+    f = open(f"../results/{file_location}")
     ret = ""
     for line in f.readlines():
         data = line.split(",")[-1].rstrip("\n")
@@ -13,10 +13,10 @@ def squash_aggregates(metadata, file_location):
 
 
 def main():
-    (_, engines, _), *file_tree_listed = os.walk("../docker-compose/results/")
+    (_, engines, _), *file_tree_listed = os.walk("../results/")
 
     aggr_total = open(
-        "../docker-compose/results/aggregated-aggregates.csv",
+        "../results/aggregated-aggregates.csv",
         "w+",
     )
 
@@ -32,7 +32,7 @@ def main():
         print(file_names)
 
         with open(
-            f"../docker-compose/results/{engine}/aggregated-aggregates.csv",
+            f"../results/{engine}/aggregated-aggregates.csv",
             "w+",
         ) as f:
             f.write(

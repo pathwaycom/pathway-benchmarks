@@ -1,0 +1,5 @@
+**
+!public/pathway
+!third_party/timely
+!.git
+!public/pathway-benchmarks/wordcount-online-streaming/services/pathway-all/main.py

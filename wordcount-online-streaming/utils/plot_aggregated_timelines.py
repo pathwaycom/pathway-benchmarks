@@ -28,7 +28,7 @@ columns = [
     "count",
 ]
 
-results_dir, *file_tree_listed = os.walk("../docker-compose/results/")
+results_dir, *file_tree_listed = os.walk("../results/")
 for (dir_path, dir_names, file_names) in file_tree_listed:
     engine = dir_path.split("/")[-1]
     print(engine + "\n")
@@ -36,7 +36,7 @@ for (dir_path, dir_names, file_names) in file_tree_listed:
 
     for name in [x for x in file_names if "aggregated" in x]:
         timeline_df = pd.read_csv(
-            f"../docker-compose/results/{engine}/{name}",
+            f"../results/{engine}/{name}",
             names=columns,
             header=None,
         )
