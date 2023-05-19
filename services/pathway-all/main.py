@@ -7,8 +7,6 @@ import sys
 import time
 from abc import ABC, abstractmethod
 
-import pkg_resources
-
 import pathway as pw  # type:ignore
 from pathway.stdlib.graphs.pagerank import pagerank  # type:ignore
 
@@ -108,7 +106,7 @@ class WordcountBenchmark(Benchmark):
         if self._channel == "fs":
             return pw.io.jsonlines.read(
                 path=self._input_filename,
-                poll_new_objects=False,  # type: ignore
+                poll_new_objects=False,
                 primary_key=None,
                 value_columns=["word"],
             )
@@ -183,12 +181,11 @@ if __name__ == "__main__":
     )
     print(result, file=sys.stderr)
     with open(
-        "results/{}-{}-{}-{}-{}.txt".format(
+        "results/{}-{}-{}-{}.txt".format(
             args.type,
             args.pagerank_steps,
             os.environ.get("PATHWAY_THREADS", 1),
             time.time(),
-            pkg_resources.get_distribution("pathway").version,
         ),
         "w",
     ) as f:
