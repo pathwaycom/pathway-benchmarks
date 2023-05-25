@@ -12,6 +12,3 @@ RUN dpkg -i scala-2.12.8.deb
 
 COPY pagerank /app
 RUN mvn clean install -Pdocker-build 1>&2
-
-# CMD java -cp /opt/flink/lib/*:/opt/flink/usrlib/pagerank-1.0-SNAPSHOT-jar-with-dependencies.jar App --pagerank_iterations 1 --input livejournal_truncated.json
-# CMD tail -f /dev/null

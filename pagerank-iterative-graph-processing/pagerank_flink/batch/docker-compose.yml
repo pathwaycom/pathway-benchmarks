@@ -2,7 +2,8 @@ version: "3.8"
 services:
   flink-pagerank:
     cpuset: $TESTED_CPU_SET
-    build: ../services/flink-pagerank
+    build:
+      context: .
     command: java -Xmx100g -cp /opt/flink/lib/*:/opt/flink/usrlib/pagerank-1.0-SNAPSHOT-jar-with-dependencies.jar App --pagerank_iterations ${PAGERANK_ITERATIONS} --input ${INPUT_FILENAME} --parallelism ${PARALLELISM}
     volumes:
-      - ../services/flink-pagerank/pagerank:/app
+      - ./pagerank:/app
