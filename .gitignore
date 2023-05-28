@@ -5,3 +5,4 @@ services/streamer/datasets/pagerank.tsv
 docker-compose/results
 services/streamer/datasets/pagerank.json
 utils/*.png
+.DS_Store
