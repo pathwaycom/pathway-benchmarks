@@ -10,5 +10,6 @@ services:
         limits:
           memory: 24G
     volumes:
-      - ../services/spark-pagerank:/pagerank
+      - .:/pagerank
+      - ../datasets:/pagerank/data
     command: bash -c "pip install psutil && cd /pagerank && python3 run.py --repeat ${REPEAT} --iterations ${ITERATIONS} --scripts ${SCRIPTS} --datasets ${DATASETS} --cores ${CPUS} --memory ${MEMORY}"

@@ -24,6 +24,12 @@ def run_flink_benchmark():
     subprocess.call(["sh", run_command], cwd=flink_path)
 
 
+def run_spark_benchmark():
+    spark_path = os.path.dirname(os.path.realpath(__file__)) + "/pagerank_spark"
+
+    subprocess.call(["sh", "doall.sh"], cwd=spark_path)
+
+
 if __name__ == "__main__":
     os.system("docker build -t pagerank_pathway -f pagerank_pathway/Dockerfile .")
 
@@ -34,3 +40,5 @@ if __name__ == "__main__":
         os.system(run_command)
 
     run_flink_benchmark()
+
+    run_spark_benchmark()

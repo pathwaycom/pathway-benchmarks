@@ -1,4 +1,5 @@
 import argparse
+import os
 import subprocess
 import time
 from datetime import datetime
@@ -17,7 +18,6 @@ def get_total_memory(p: psutil.Popen):
             max_memory = max(max_memory, current_memory)
         except Exception:
             pass
-        # print(len(children), p.memory_info()[0] / 1e9, current_memory / 1e9)
         time.sleep(0.5)
     return max_memory
 
@@ -29,9 +29,9 @@ def run(repeat, iterations, script_name, dataset, cores, memory):
             "--master",
             f"local[{cores}]",
             "--driver-memory",
-            memory,  # 4g
-            script_name,  # "spark_pagerank_4.py",
-            dataset,  # "datasets/livejournal10_000.jl",
+            memory,
+            script_name,
+            dataset,
             str(iterations),
         ],
         stdout=subprocess.PIPE,
@@ -39,6 +39,7 @@ def run(repeat, iterations, script_name, dataset, cores, memory):
     max_memory = get_total_memory(p)
     out, _ = p.communicate()
     total_time = out.decode("UTF-8").split("\n")[-2]
+    os.makedirs("logs/", exist_ok=True)
     with open(
         f"logs/{cores}_{dataset.split('/')[-1]}-{script_name}-{iterations}-{repeat}.csv",
         "w",
