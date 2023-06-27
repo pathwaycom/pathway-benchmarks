@@ -1,6 +1,4 @@
 FROM python:3.10
-# FROM pathway-debug
-ENV USING_BENCHMARK_HARNESS=1
 
 RUN mkdir -p /public/pathway
 RUN mkdir third_party
@@ -18,5 +16,4 @@ COPY ./services/pathway-all/main.py /pathway-all/main.py
 CMD echo $(pathway --version) > /pathway-all/results/pw-version.txt \
     && pathway spawn \
         --threads $CORES python main.py \
-        --type $BENCHMARK_TYPE \
         --autocommit-frequency-ms $AUTOCOMMIT_FREQUENCY_MS 

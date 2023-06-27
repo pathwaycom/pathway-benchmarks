@@ -34,7 +34,7 @@ if __name__ == "__main__":
     os.system("docker build -t pagerank_pathway -f pagerank_pathway/Dockerfile .")
 
     for dataset_name in DATASET_NAMES:
-        run_command = "docker run -e 'DATASET_PATH={}' -e 'AVAILABLE_CORE_IDS=0,1,2,3,4,5' -e 'N_CORES_TO_TEST=1,2,4,6' -e 'N_STEPS_TO_TEST=5' -e 'REPEATS=5' pagerank_pathway".format(  # noqa: E501
+        run_command = "docker run -v ./results:/pagerank-pathway/results -e 'DATASET_PATH={}' -e 'AVAILABLE_CORE_IDS=0,1,2,3,4,5' -e 'N_CORES_TO_TEST=1,2,4,6' -e 'N_STEPS_TO_TEST=5' -e 'REPEATS=5' pagerank_pathway".format(  # noqa: E501
             dataset_name
         )
         os.system(run_command)

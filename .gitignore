@@ -1,3 +1,6 @@
+wordcount-online-streaming/results
+wordcount-online-streaming/datasets/wordcount-large.csv
+wordcount-online-streaming/services/streamer/datasets/
 services/streamer/.dataset-tmp
 services/streamer/.dataset-tmp-output
 services/streamer/datasets/wordcount-large.csv

@@ -1,8 +1,8 @@
 import subprocess
 from functools import partial
 
-throughputs = [x for x in range(200000, 800001, 100000)]
-pw_throughputs = [x for x in range(200000, 800001, 100000)]
+throughputs = [x for x in range(200000, 2800001, 100000)]
+pw_throughputs = [x for x in range(200000, 2800001, 100000)]
 
 pw_batch_size_ms = [20, 100]
 batch_size_ms = [20, 100]

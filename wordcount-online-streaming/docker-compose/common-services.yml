@@ -12,8 +12,6 @@ services:
   kafka-common:
     cpuset: $HARNESS_CPU_SET
     image: wurstmeister/kafka
-    ports:
-      - "${KAFKA_PORT}:9092"
     depends_on:
       zookeeper:
         condition: service_healthy
@@ -36,6 +34,8 @@ services:
       interval: 10s
       timeout: 10s
       retries: 100
+    ports:
+      - 9092:9092
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
   streamer-common:

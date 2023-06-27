@@ -22,7 +22,6 @@ COPY ./datasets /streamer/datasets
 
 CMD python main.py \
     --type $BENCHMARK_TYPE \
-    --batch-size $COMMIT_FREQUENCY \
     --rate-per-second $RATE_PER_SECOND \
     --autocommit-frequency-ms $AUTOCOMMIT_FREQUENCY_MS \
     --skip-prefix-length $DATASET_WARMUP_PREFIX_LENGTH \

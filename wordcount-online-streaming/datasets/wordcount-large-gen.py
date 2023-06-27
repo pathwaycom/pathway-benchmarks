@@ -18,7 +18,6 @@ def generate_dictionary(dict_size):
 
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser(description="wordcount test generator")
     parser.add_argument("--dict-size", type=int, required=False, default=5000)
     parser.add_argument("--dataset-size", type=int, required=False, default=76000000)
