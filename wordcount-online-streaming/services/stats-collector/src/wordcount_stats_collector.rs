@@ -173,10 +173,9 @@ fn main() {
             string_line = line.unwrap().to_string();
             eprintln!("{}", string_line);
         }
-        let from_file = string_line.clone();
         pw_version = string_line
             .strip_prefix("pathway, version ")
-            .unwrap_or(&format!("local.{}", &from_file))
+            .unwrap_or(&format!("local.{}", &string_line))
             .to_string();
     }
 
