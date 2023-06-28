@@ -120,5 +120,6 @@ if __name__ == "__main__":
                 "w",
             ) as f:
                 f.write(result)
+            break
         except FileNotFoundError:
             os.mkdir("results")
