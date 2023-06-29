@@ -1,5 +1,6 @@
 import argparse
 import json
+import os
 import random
 
 random.seed(1)
@@ -24,7 +25,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     dictionary = generate_dictionary(args.dict_size)
-    with open("datasets/wordcount-large.csv", "w") as f:
+    path = os.path.join(os.path.dirname(__file__), "wordcount-large.csv")
+    with open(path, "w") as f:
         lines_written = 0
         for _ in range(args.dataset_size):
             current_word = random.choice(dictionary)
