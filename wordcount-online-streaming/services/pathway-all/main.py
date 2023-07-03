@@ -27,7 +27,7 @@ class WordcountBenchmark(Benchmark):
     def get_input_table(self):
         return pw.io.kafka.read(
             rdkafka_settings=self.get_rdkafka_settings(),
-            topic_names=["test_0"],
+            topic="test_0",
             format="json",
             value_columns=["word"],
             autocommit_duration_ms=self._autocommit_frequency_ms,
