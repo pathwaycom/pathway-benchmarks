@@ -1,8 +1,8 @@
 import argparse
+import logging
 import os
 import subprocess
 import time
-from datetime import datetime
 
 import psutil
 
@@ -39,9 +39,9 @@ def run(repeat, iterations, script_name, dataset, cores, memory):
     max_memory = get_total_memory(p)
     out, _ = p.communicate()
     total_time = out.decode("UTF-8").split("\n")[-2]
-    os.makedirs("logs/", exist_ok=True)
+    os.makedirs("/results/", exist_ok=True)
     with open(
-        f"logs/{cores}_{dataset.split('/')[-1]}-{script_name}-{iterations}-{repeat}.csv",
+        f"/results/spark-{cores}_{dataset.split('/')[-1]}-{script_name}-{iterations}-{repeat}.csv",
         "w",
     ) as f:
         f.write(f"{max_memory},{total_time}\n")
@@ -71,11 +71,18 @@ if __name__ == "__main__":
     scripts = args.scripts.split(",")
     datasets = args.datasets.split(",")
 
-    print(args.repeat, iterations, scripts, args.datasets)
+    logging.basicConfig(
+        level=logging.INFO,
+        format="[%(asctime)s]:%(levelname)s:%(message)s",
+        datefmt="%Y-%m-%dT%H:%M:%S",
+    )
+    logging.info(f"{args.repeat}, {iterations}, {scripts}, {args.datasets}")
 
     for r in range(args.repeat):
         for i in iterations:
             for script_name in scripts:
                 for dataset in datasets:
-                    print(datetime.now(), r, i, script_name, dataset)
+                    logging.info(
+                        f"repeat no.: {r}, iterations: {i}, {script_name}, {dataset}"
+                    )
                     run(r, i, script_name, dataset, args.cores, args.memory)

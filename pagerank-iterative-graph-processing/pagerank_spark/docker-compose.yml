@@ -11,5 +11,6 @@ services:
           memory: 24G
     volumes:
       - .:/pagerank
-      - ../datasets:/pagerank/data
+      - ../datasets:/data
+      - ../results:/results
     command: bash -c "pip install psutil && cd /pagerank && python3 run.py --repeat ${REPEAT} --iterations ${ITERATIONS} --scripts ${SCRIPTS} --datasets ${DATASETS} --cores ${CPUS} --memory ${MEMORY}"

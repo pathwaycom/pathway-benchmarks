@@ -3,7 +3,7 @@
 export REPEAT=5
 export ITERATIONS="1,2,5,10,20"
 export SCRIPTS="spark_pagerank_sql.py,spark_pagerank_example.py"
-export DATASETS="data/pagerank-full.jsonlines"
+export DATASETS="/data/pagerank-full.jsonlines"
 export MEMORY="20g"
 
 export CPUSET="6"
@@ -43,7 +43,7 @@ docker-compose down -v
 
 
 export SCRIPTS="graphxpagerank.jar"
-export DATASETS="data/soc-LiveJournal1.txt"
+export DATASETS="/data/soc-LiveJournal1.txt"
 
 export CPUSET="6"
 export CPUS=1
