@@ -66,6 +66,7 @@ class PagerankBenchmark(Benchmark):
                 "u": pw.Type.INT,
                 "v": pw.Type.INT,
             },
+            autocommit_duration_ms=None,
         )
 
     def run_benchmark(self):
