@@ -19,7 +19,7 @@
 
 This repository contains benchmarks to compare the performance of Pathway against state-of-the-art technologies designed for streaming and batch data processing tasks, including Flink, Spark and Kafka Streaming. For a complete write-up of the benchmarks, read our corresponding [benchmarking article](www.pathway.com/blog/benchmarks).
 
-![WordCount and PageRank Results](images/bm-wordcount-pagerank.png)
+![WordCount Results](images/bm-wordcount-lineplot.png)
 
 The benchmarks are reproducible using the code in this repository. Find the instructions below under "Reproducing the benchmarks". 
 
@@ -32,7 +32,7 @@ The repository contains two types of benchmarks:
 
 The two benchmarks each represent a type of workload Pathway aims to support: online streaming tasks and graph processing tasks. The graph-processing benchmark (i.e. PageRank) is evaluated in three modes: batch, streaming, and a mixed batch-online mode we call backfilling which evaluates the ability of the engine to switch from batch to online mid-way.
 
-For a full description of how the benchmarks were designed and executed, read our [Arxiv preprint paper]().
+For a full discussion of the results obtained, read our [benchmarking article](www.pathway.com/blog/streaming-benchmarks-pathway-fastest-engine-on-the-market).
 
 ## Machine specs
 
@@ -54,7 +54,7 @@ The graph below shows results of the WordCount benchmark. 95% latency is reporte
 
 Pathway clearly outperforms the default Flink setup in terms of sustained throughput, and dominates the Flink minibatching setup in terms of latency for all of the throughput spectrum we could measure. For most throughputs, Pathway also achieves lower latency than the better of the two Flink setups.
 
-![WordCount Graph](images/wordcount-all-engines.png)
+![WordCount Graph](images/bm-wordcount-lineplot.png)
 
 
 ### PageRank benchmark (batch)
@@ -63,7 +63,7 @@ in seconds to process the dataset. The standard code logic is an idiomatic (join
 
 The fastest performance is achieved by the Spark GraphX implementation and the more aggressively-optimized Pathway build. The formulation (and syntax) of the GraphX algorithm is different from the others. Performing an apples-to-apples comparison of performance of equivalent logic in Table APIs, Pathway is the fastest, followed by Flink and Spark.
 
-![PageRank Batch Results](images/bm-pagerank-batch-selected.png)
+![PageRank Batch Results](images/bm-pagerank-batch.png)
 
 
 ### PageRank benchmark (streaming)
@@ -73,7 +73,7 @@ We evaluate only two systems on the streaming PageRank task: Pathway and Flink. 
 
 We see that while both systems are able to run the streaming benchmark, Pathway maintains a large advantage over Flink. It is hard to say whether this advantage is “constant” (with a factor of about 50x) or increases “asymptotically” with dataset size. Indeed, extending the benchmarks to tests on larger datasets than those reported in Table 2 is problematic as Flink’s performance is degraded by memory issues.
 
-![PageRank Streaming Results](images/bm-pagerank-streaming-selected.png)
+![PageRank Streaming Results](images/bm-pagerank-streaming.png)
 
 
 ### PageRank benchmark (backfilling)
@@ -83,9 +83,9 @@ Pathway again offers superior performance, completing the first of the datasets 
 
 For backfilling on the complete LiveJournal dataset, Flink either ran out of memory or failed to complete the task on 6 cores within 2 hours, depending on the setup.
 
-![PageRank Backfilling Results](images/bm-pagerank-backfill-selected.png)
+![PageRank Backfilling Results](images/bm-pagerank-backfill.png)
 
-For a full discussion of the results obtained, read our [benchmarking article](www.pathway.com/blog/benchmarks).
+For a full discussion of the results obtained, read our [benchmarking article](www.pathway.com/blog/streaming-benchmarks-pathway-fastest-engine-on-the-market).
 
 The following sections contain information necessary for reproducing the benchmarks. 
 
