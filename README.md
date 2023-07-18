@@ -19,7 +19,7 @@
 
 This repository contains benchmarks to compare the performance of Pathway against state-of-the-art technologies designed for streaming and batch data processing tasks, including Flink, Spark and Kafka Streaming. For a complete write-up of the benchmarks, read our corresponding [benchmarking article](www.pathway.com/blog/benchmarks).
 
-![WordCount Results](images/bm-wordcount-lineplot.png)
+![WordCount and PageRank Results](images/bm-wordcount-and-pagerank.png)
 
 The benchmarks are reproducible using the code in this repository. Find the instructions below under "Reproducing the benchmarks". 
 
