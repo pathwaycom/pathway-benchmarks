@@ -22,8 +22,8 @@ do
         do
             cpusetmin=0
             cpusetmax=$(( parallelism - 1 ))      
-            docker-compose -p flink_batch_$USER -f batch/docker-compose.yml down -v
-            TESTED_CPU_SET="$cpusetmin-$cpusetmax" PARALLELISM=$parallelism PAGERANK_ITERATIONS=$iterations INPUT_FILENAME=$dataset.json docker-compose -p flink_batch_$USER -f batch/docker-compose.yml up > batch/results/result-$rundate-$dataset-$parallelism-$iterations-$try.txt
+            docker compose -p flink_batch_$USER -f batch/docker-compose.yml down -v
+            TESTED_CPU_SET="$cpusetmin-$cpusetmax" PARALLELISM=$parallelism PAGERANK_ITERATIONS=$iterations INPUT_FILENAME=$dataset.json docker compose -p flink_batch_$USER -f batch/docker-compose.yml up > batch/results/result-$rundate-$dataset-$parallelism-$iterations-$try.txt
         done
     done
 
@@ -38,8 +38,8 @@ do
         do
             cpusetmin=0
             cpusetmax=$(( parallelism - 1 ))
-            docker-compose -p flink_streaming_$USER -f streaming/docker-compose.yml down -v
-            TESTED_CPU_SET="$cpusetmin-$cpusetmax" BACKFILL=$backfill BATCH_SIZE=100000000 ALLOW_LATENCY=$minibatch PARALLELISM=$parallelism PAGERANK_ITERATIONS=$iterations INPUT_FILENAME=$dataset.json docker-compose -p flink_streaming_$USER -f streaming/docker-compose.yml up > streaming/results/result-nobackfill-$rundate-$dataset-$parallelism-$iterations-$try.txt
+            docker compose -p flink_streaming_$USER -f streaming/docker-compose.yml down -v
+            TESTED_CPU_SET="$cpusetmin-$cpusetmax" BACKFILL=$backfill BATCH_SIZE=100000000 ALLOW_LATENCY=$minibatch PARALLELISM=$parallelism PAGERANK_ITERATIONS=$iterations INPUT_FILENAME=$dataset.json docker compose -p flink_streaming_$USER -f streaming/docker-compose.yml up > streaming/results/result-nobackfill-$rundate-$dataset-$parallelism-$iterations-$try.txt
         done
     done
 
@@ -51,9 +51,9 @@ do
         do
             cpusetmin=0
             cpusetmax=$(( parallelism - 1 ))
-            docker-compose -p flink_streaming_$USER -f streaming/docker-compose.yml down -v
+            docker compose -p flink_streaming_$USER -f streaming/docker-compose.yml down -v
             # parallelism set to 6 to avoid hitting minibatch buffers
-            TESTED_CPU_SET="$cpusetmin-$cpusetmax" BACKFILL=$backfill BATCH_SIZE=100000000 ALLOW_LATENCY=$minibatch PARALLELISM=6 PAGERANK_ITERATIONS=$iterations INPUT_FILENAME=$dataset.json docker-compose -p flink_streaming_$USER -f streaming/docker-compose.yml up > streaming/results/result-backfill-4.5M-$rundate-$dataset-$parallelism-$iterations-$try.txt
+            TESTED_CPU_SET="$cpusetmin-$cpusetmax" BACKFILL=$backfill BATCH_SIZE=100000000 ALLOW_LATENCY=$minibatch PARALLELISM=6 PAGERANK_ITERATIONS=$iterations INPUT_FILENAME=$dataset.json docker compose -p flink_streaming_$USER -f streaming/docker-compose.yml up > streaming/results/result-backfill-4.5M-$rundate-$dataset-$parallelism-$iterations-$try.txt
         done
     done
 
@@ -65,9 +65,9 @@ do
         do
             cpusetmin=0
             cpusetmax=$(( parallelism - 1 ))
-            docker-compose -p flink_streaming_$USER -f streaming/docker-compose.yml down -v
+            docker compose -p flink_streaming_$USER -f streaming/docker-compose.yml down -v
             # parallelism set to 6 to avoid hitting minibatch buffers
-            TESTED_CPU_SET="$cpusetmin-$cpusetmax" BACKFILL=$backfill BATCH_SIZE=100000000 ALLOW_LATENCY=$minibatch PARALLELISM=6 PAGERANK_ITERATIONS=$iterations INPUT_FILENAME=$dataset.json docker-compose -p flink_streaming_$USER -f streaming/docker-compose.yml up > streaming/results/result-backfill-4999999-$rundate-$dataset-$parallelism-$iterations-$try.txt
+            TESTED_CPU_SET="$cpusetmin-$cpusetmax" BACKFILL=$backfill BATCH_SIZE=100000000 ALLOW_LATENCY=$minibatch PARALLELISM=6 PAGERANK_ITERATIONS=$iterations INPUT_FILENAME=$dataset.json docker compose -p flink_streaming_$USER -f streaming/docker-compose.yml up > streaming/results/result-backfill-4999999-$rundate-$dataset-$parallelism-$iterations-$try.txt
         done
     done
 

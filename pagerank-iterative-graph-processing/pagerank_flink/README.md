@@ -10,8 +10,8 @@ To run all the Flink pagerank benchmarks:
     * `livejournal_400.json`
 
 2. (Optionally) Build the containers with
-  - `docker-compose -p flink_batch_$USER -f batch/docker-compose.yml build`
-  - `docker-compose -p flink_streaming_$USER -f streaming/docker-compose.yml build`
+  - `docker compose -p flink_batch_$USER -f batch/docker-compose.yml build`
+  - `docker compose -p flink_streaming_$USER -f streaming/docker-compose.yml build`
 
 3. Run `flink_pagerank_all_final.sh`.
 This will run all benchmarks (can take few hours) and will produce log file for each run

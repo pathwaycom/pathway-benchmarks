@@ -110,12 +110,12 @@ def main():
         + "CORES={3} "
         + "TESTED_CPU_SET={{tested_cpu_map[{3}]}} "
         + "HARNESS_CPU_SET={{harness_cpu_map[{3}]}} "
-        + "docker-compose -p $USER "
+        + "docker compose -p $USER "
         + "--env-file docker-compose/variables_ext.env "
         + "-f docker-compose/docker-compose-{{docker_compose_map[{0}]}}.yml "
         + "up stats-collector> {0}_log.txt>&1 --build"
     )
-    down_command = "docker-compose -p $USER down -v --remove-orphans"
+    down_command = "docker compose -p $USER down -v --remove-orphans"
 
     # Below, we iterate over reps and dict-sizes outside of the function, as:
     # - reps do not go into the command (albeit one could add some comment at the end that
