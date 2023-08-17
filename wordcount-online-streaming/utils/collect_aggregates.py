@@ -26,7 +26,7 @@ def main():
         + ",dict_size,skip_prefix_length,wait_time_ms,recorded_dataset_size\n"
     )
 
-    for (dir_path, dir_names, file_names) in file_tree_listed:
+    for dir_path, dir_names, file_names in file_tree_listed:
         engine = dir_path.split("/")[-1]
         print(engine + "\n")
         print(file_names)

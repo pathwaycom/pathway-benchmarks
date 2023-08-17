@@ -128,7 +128,6 @@ def main():
 
     for rep in range(REPS):
         for dsize in dict_sizes:
-
             dict_size_pref = f"DICT_SIZE={dsize} "
             testgen_cmd = (
                 "python datasets/wordcount-large-gen.py "

@@ -53,7 +53,6 @@ ranks = degrees.withColumn("rank", sf.lit(6_000)).drop("degree")
 
 iterations = int(sys.argv[2]) if len(sys.argv) >= 3 else 5
 for _ in range(iterations):
-
     outflow = degrees.join(ranks, "u").withColumn(
         "outflow",
         sf.when(

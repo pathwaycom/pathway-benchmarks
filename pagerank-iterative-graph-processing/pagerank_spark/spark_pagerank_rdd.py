@@ -46,7 +46,6 @@ ranks = degrees.map(lambda entry: (entry[0], 6_000))
 
 iterations = int(sys.argv[2]) if len(sys.argv) >= 3 else 5
 for _ in range(iterations):
-
     outflow = degrees.join(ranks).map(
         lambda entry: (
             entry[0],

@@ -29,7 +29,7 @@ columns = [
 ]
 
 results_dir, *file_tree_listed = os.walk("../results/")
-for (dir_path, dir_names, file_names) in file_tree_listed:
+for dir_path, dir_names, file_names in file_tree_listed:
     engine = dir_path.split("/")[-1]
     print(engine + "\n")
     print(file_names)
