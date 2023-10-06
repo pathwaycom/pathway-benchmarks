@@ -11,7 +11,7 @@ RUN mkdir -p /pagerank-pathway
 WORKDIR /pagerank-pathway
 
 RUN echo "remote build" \
-    && pip install --no-cache-dir --upgrade pathway \
+    && pip install --no-cache-dir --upgrade pathway==0.4.1 \
     && echo $(pathway --version); 
 
 COPY ./datasets/ /pagerank-pathway/datasets
