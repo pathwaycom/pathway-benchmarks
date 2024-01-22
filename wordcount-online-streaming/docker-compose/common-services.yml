@@ -16,7 +16,7 @@ services:
       zookeeper:
         condition: service_healthy
     environment:
-      DOCKER_API_VERSION: 1.22
+      DOCKER_API_VERSION: 1.24
       HOSTNAME_COMMAND: "route -n | awk '/UG[ \t]/{print $$2}'"
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_CREATE_TOPICS: "test_0:$KAFKA_INPUT_TOPIC_PARTITIONS:1:delete,test_1:1:1:delete"
