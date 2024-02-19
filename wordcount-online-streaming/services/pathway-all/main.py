@@ -19,8 +19,7 @@ class Benchmark(ABC):
         }
 
     @abstractmethod
-    def run_benchmark(self):
-        ...
+    def run_benchmark(self): ...
 
 
 class WordcountBenchmark(Benchmark):

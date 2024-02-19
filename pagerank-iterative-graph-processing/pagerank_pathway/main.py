@@ -47,8 +47,7 @@ class Benchmark(ABC):
         self._input_filename = input_filename
 
     @abstractmethod
-    def run_benchmark(self):
-        ...
+    def run_benchmark(self): ...
 
 
 class PagerankBenchmark(Benchmark):
