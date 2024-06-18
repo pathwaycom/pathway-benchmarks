@@ -15,7 +15,7 @@
             alt="follow on Twitter"></a>
 </p>
 
-[Pathway](www.pathway.com) is a reactive data processing framework designed for high-throughput and low-latency realtime data processing. Pathway's unified Rust engine processes code seamlessly in both batch and streaming mode using the same Python API syntax. 
+[Pathway](https://www.pathway.com) is a reactive data processing framework designed for high-throughput and low-latency realtime data processing. Pathway's unified Rust engine processes code seamlessly in both batch and streaming mode using the same Python API syntax. 
 
 This repository contains benchmarks to compare the performance of Pathway against state-of-the-art technologies designed for streaming and batch data processing tasks, including Flink, Spark and Kafka Streaming. For a complete write-up of the benchmarks, read our corresponding [benchmarking article](https://pathway.com/blog/streaming-benchmarks-pathway-fastest-engine-on-the-market).
 
@@ -32,7 +32,7 @@ The repository contains two types of benchmarks:
 
 The two benchmarks each represent a type of workload Pathway aims to support: online streaming tasks and graph processing tasks. The graph-processing benchmark (i.e. PageRank) is evaluated in three modes: batch, streaming, and a mixed batch-online mode we call backfilling which evaluates the ability of the engine to switch from batch to online mid-way.
 
-For a full discussion of the results obtained, read our [benchmarking article](www.pathway.com/blog/streaming-benchmarks-pathway-fastest-engine-on-the-market).
+For a full discussion of the results obtained, read our [benchmarking article](https://pathway.com/blog/streaming-benchmarks-pathway-fastest-engine-on-the-market).
 
 ## Machine specs
 
@@ -85,7 +85,7 @@ For backfilling on the complete LiveJournal dataset, Flink either ran out of mem
 
 ![PageRank Backfilling Results](images/bm-pagerank-backfill.png)
 
-For a full discussion of the results obtained, read our [benchmarking article](www.pathway.com/blog/streaming-benchmarks-pathway-fastest-engine-on-the-market).
+For a full discussion of the results obtained, read our [benchmarking article](https://pathway.com/blog/streaming-benchmarks-pathway-fastest-engine-on-the-market).
 
 The following sections contain information necessary for reproducing the benchmarks. 
 
