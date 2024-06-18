@@ -17,7 +17,7 @@
 
 [Pathway](www.pathway.com) is a reactive data processing framework designed for high-throughput and low-latency realtime data processing. Pathway's unified Rust engine processes code seamlessly in both batch and streaming mode using the same Python API syntax. 
 
-This repository contains benchmarks to compare the performance of Pathway against state-of-the-art technologies designed for streaming and batch data processing tasks, including Flink, Spark and Kafka Streaming. For a complete write-up of the benchmarks, read our corresponding [benchmarking article](www.pathway.com/blog/benchmarks).
+This repository contains benchmarks to compare the performance of Pathway against state-of-the-art technologies designed for streaming and batch data processing tasks, including Flink, Spark and Kafka Streaming. For a complete write-up of the benchmarks, read our corresponding [benchmarking article](https://pathway.com/blog/streaming-benchmarks-pathway-fastest-engine-on-the-market).
 
 ![WordCount and PageRank Results](images/bm-wordcount-and-pagerank.png)
 
