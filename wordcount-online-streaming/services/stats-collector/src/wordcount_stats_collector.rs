@@ -249,11 +249,12 @@ fn main() {
     let mut latency_timeline: Vec<TimeLatency> = Vec::new();
 
     for x in &word_count {
-        if time_counts.get(&x.word).is_none() {
+        let time_counts_x = time_counts.get(&x.word);
+        if time_counts_x.is_none() {
             lost_cnt += 1;
             continue;
         }
-        let time_counts_x = time_counts.get(&x.word).unwrap();
+        let time_counts_x = time_counts_x.unwrap();
         let res = time_counts_x.binary_search(&CountAndTime {
             count: x.count,
             timestamp: x.timestamp,
