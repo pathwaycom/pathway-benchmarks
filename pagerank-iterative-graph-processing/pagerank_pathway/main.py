@@ -59,12 +59,12 @@ class PagerankBenchmark(Benchmark):
         return pw.io.jsonlines.read(
             path=self._input_filename,
             mode="static",
-            primary_key=None,
-            value_columns=["u", "v"],
-            types={
-                "u": pw.Type.INT,
-                "v": pw.Type.INT,
-            },
+            schema=pw.schema_builder(
+                columns={
+                    "u": pw.column_definition(dtype=int),
+                    "v": pw.column_definition(dtype=int),
+                }
+            ),
             autocommit_duration_ms=None,
         )
 

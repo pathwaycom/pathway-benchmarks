@@ -28,7 +28,7 @@ class WordcountBenchmark(Benchmark):
             rdkafka_settings=self.get_rdkafka_settings(),
             topic="test_0",
             format="json",
-            value_columns=["word"],
+            schema=pw.schema_from_types(word=str),
             autocommit_duration_ms=self._autocommit_frequency_ms,
         )
 
