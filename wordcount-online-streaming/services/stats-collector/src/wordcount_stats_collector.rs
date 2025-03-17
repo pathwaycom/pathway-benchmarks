@@ -35,7 +35,7 @@ struct WordCountOutputLine {
 }
 
 fn is_pathway_word_count_header(line: String) -> bool {
-    let items: Vec<&str> = line.split(',').collect();
+    let items: Vec<&str> = line.split(',').map(|s| s.trim_matches('"')).collect();
     items[0].eq("word") && items[1].eq("count")
 }
 
@@ -59,7 +59,7 @@ fn parse_wordcount_output_message(csv: &str) -> Option<WordCountOutputLine> {
         return None;
     }
 
-    let value: Vec<&str> = line.split(',').collect();
+    let value: Vec<&str> = line.split(',').map(|s| s.trim_matches('"')).collect();
 
     // handle pathway delta
     if value.len() == 4 && (value[3].eq("-1")) {
