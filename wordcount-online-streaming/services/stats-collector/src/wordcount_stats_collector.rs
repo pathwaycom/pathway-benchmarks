@@ -171,7 +171,7 @@ fn main() {
         let mut string_line = "pathway, version UNKNOWN".to_string();
         for line in BufReader::new(file).lines() {
             string_line = line.unwrap().to_string();
-            eprintln!("{}", string_line);
+            eprintln!("{string_line}");
         }
         pw_version = string_line
             .strip_prefix("pathway, version ")
