@@ -5,7 +5,7 @@ services:
     ports:
       - 2181:2181
     healthcheck:
-      test: [ "CMD", "nc", "-vz", "localhost", "2181" ]
+      test: ["CMD", "nc", "-vz", "localhost", "2181"]
       interval: 10s
       timeout: 10s
       retries: 100
@@ -16,7 +16,7 @@ services:
       zookeeper:
         condition: service_healthy
     environment:
-      DOCKER_API_VERSION: 1.24
+      DOCKER_API_VERSION: 1.44
       HOSTNAME_COMMAND: "route -n | awk '/UG[ \t]/{print $$2}'"
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_CREATE_TOPICS: "test_0:$KAFKA_INPUT_TOPIC_PARTITIONS:1:delete,test_1:1:1:delete"
@@ -30,7 +30,7 @@ services:
       KAFKA_FETCH_MAX_WAIT_MS: 10
       KAFKA_METADATA_MAX_AGE_MS: 10
     healthcheck:
-      test: [ "CMD", "nc", "-vz", "localhost", "9092" ]
+      test: ["CMD", "nc", "-vz", "localhost", "9092"]
       interval: 10s
       timeout: 10s
       retries: 100
@@ -52,7 +52,7 @@ services:
     depends_on:
       kafka:
         condition: service_healthy
-        
+
   stats-collector-common:
     cpuset: $HARNESS_CPU_SET
     build:
@@ -74,7 +74,7 @@ services:
       - DICT_SIZE
       - RECORDED_DATASET_SIZE
       - STREAMER_WAIT_TIME_MS
-      - CODE_VERSION 
+      - CODE_VERSION
 
     depends_on:
       streamer:
