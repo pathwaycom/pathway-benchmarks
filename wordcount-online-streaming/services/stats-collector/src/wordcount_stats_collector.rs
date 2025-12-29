@@ -329,7 +329,7 @@ fn main() {
         trimmed_lt.sort_by(|a, b| b.timestamp.cmp(&a.timestamp));
         let mut tree: BTreeMap<i64, AggregatedStats> = BTreeMap::new();
 
-        for (key, mut group) in &trimmed_lt.into_iter().group_by(|elt| (elt.timestamp)) {
+        for (key, mut group) in &trimmed_lt.into_iter().group_by(|elt| elt.timestamp) {
             tree.insert(key, aggregate_stats_for_batch(&mut group));
         }
         let mut str_buffer: String = String::new();
@@ -349,7 +349,7 @@ fn main() {
         trimmed_lt.sort_by(|a, b| b.timestamp.cmp(&a.timestamp));
         let mut tree: BTreeMap<i64, AggregatedStats> = BTreeMap::new();
 
-        for (key, mut group) in &trimmed_lt.into_iter().group_by(|elt| (elt.timestamp)) {
+        for (key, mut group) in &trimmed_lt.into_iter().group_by(|elt| elt.timestamp) {
             tree.insert(key, aggregate_stats_for_batch(&mut group));
         }
         let mut str_buffer: String = String::new();
@@ -370,7 +370,7 @@ fn main() {
 
         for (key, mut group) in &latency_timeline
             .into_iter()
-            .group_by(|elt| (elt.pathway_time.unwrap()))
+            .group_by(|elt| elt.pathway_time.unwrap())
         {
             tree.insert(key, aggregate_stats_for_batch(&mut group));
         }
