@@ -130,7 +130,7 @@ struct AggregatedStats {
 }
 fn aggregate_stats_for_batch(group: &mut dyn Iterator<Item = TimeLatency>) -> AggregatedStats {
     let mut tmp: Vec<TimeLatency> = group.collect::<Vec<TimeLatency>>();
-    tmp.sort_by(|a, b| b.latency.cmp(&a.latency));
+    tmp.sort_by_key(|b| std::cmp::Reverse(b.latency));
     AggregatedStats {
         min: tmp[0].latency,
         p05: tmp[tmp.len() / 20].latency,
@@ -326,7 +326,7 @@ fn main() {
     if print_time_aggregated {
         let mut trimmed_lt = latency_timeline[skip_prefix_length..].to_vec();
 
-        trimmed_lt.sort_by(|a, b| b.timestamp.cmp(&a.timestamp));
+        trimmed_lt.sort_by_key(|b| std::cmp::Reverse(b.timestamp));
         let mut tree: BTreeMap<i64, AggregatedStats> = BTreeMap::new();
 
         for (key, mut group) in &trimmed_lt.into_iter().group_by(|elt| elt.timestamp) {
@@ -346,7 +346,7 @@ fn main() {
     if print_time_aggregated {
         let mut trimmed_lt = latency_timeline[0..skip_prefix_length].to_vec();
 
-        trimmed_lt.sort_by(|a, b| b.timestamp.cmp(&a.timestamp));
+        trimmed_lt.sort_by_key(|b| std::cmp::Reverse(b.timestamp));
         let mut tree: BTreeMap<i64, AggregatedStats> = BTreeMap::new();
 
         for (key, mut group) in &trimmed_lt.into_iter().group_by(|elt| elt.timestamp) {
@@ -365,7 +365,7 @@ fn main() {
 
     if print_pathway_time_aggregated {
         let mut str_buffer: String = String::new();
-        latency_timeline.sort_by(|a, b| b.pathway_time.unwrap().cmp(&a.pathway_time.unwrap()));
+        latency_timeline.sort_by_key(|b| std::cmp::Reverse(b.pathway_time.unwrap()));
         let mut tree: BTreeMap<i64, AggregatedStats> = BTreeMap::new();
 
         for (key, mut group) in &latency_timeline
