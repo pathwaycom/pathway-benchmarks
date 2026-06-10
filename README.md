@@ -15,7 +15,7 @@
             alt="follow on Twitter"></a>
 </p>
 
-[Pathway](https://www.pathway.com) is a reactive data processing framework designed for high-throughput and low-latency realtime data processing. Pathway's unified Rust engine processes code seamlessly in both batch and streaming mode using the same Python API syntax. 
+[Pathway Live Data Framework](https://www.pathway.com) is a reactive data processing framework designed for high-throughput and low-latency realtime data processing. The Pathway Live Data Framework's unified Rust engine processes code seamlessly in both batch and streaming mode using the same Python API syntax. 
 
 This repository contains benchmarks to compare the performance of Pathway against state-of-the-art technologies designed for streaming and batch data processing tasks, including Flink, Spark and Kafka Streaming. For a complete write-up of the benchmarks, read our corresponding [benchmarking article](https://pathway.com/blog/streaming-benchmarks-pathway-fastest-engine-on-the-market).
 
@@ -30,7 +30,7 @@ The repository contains two types of benchmarks:
 - The **WordCount Benchmark** reads words from the stream and stores the count of each word in the output stream. For the sake of output compaction, only changed entries are streamed. In this benchmark, a Kafka cluster is used for input and output.
 - The **PageRank Benchmark** gets graph edges from the input stream, computes the PageRank of each node, and streams it to the output. In this benchmark, filesystem input and empty output are used.
 
-The two benchmarks each represent a type of workload Pathway aims to support: online streaming tasks and graph processing tasks. The graph-processing benchmark (i.e. PageRank) is evaluated in three modes: batch, streaming, and a mixed batch-online mode we call backfilling which evaluates the ability of the engine to switch from batch to online mid-way.
+The two benchmarks each represent a type of workload the Pathway Live Data Framework aims to support: online streaming tasks and graph processing tasks. The graph-processing benchmark (i.e. PageRank) is evaluated in three modes: batch, streaming, and a mixed batch-online mode we call backfilling which evaluates the ability of the engine to switch from batch to online mid-way.
 
 For a full discussion of the results obtained, read our [benchmarking article](https://pathway.com/blog/streaming-benchmarks-pathway-fastest-engine-on-the-market).
 
@@ -44,15 +44,15 @@ All experiments are run using Docker, enforcing limits on used CPU cores and RAM
 ## Results
 
 This section presents the results of the benchmarks. The results show that:
-1. Pathway is on-par with or outperforms state-of-the-art solutions for common online streaming tasks (WordCount).
-2. Pathway outperforms the other benchmarked engines for iterative graph processing tasks in **batch**.
-3. Pathway outperforms the other benchmarked engines for iterative graph processing tasks in **streaming**.
-4. Pathway is uniquely able to handle mixed **batch-and-streaming** workloads at scale.
+1. The Pathway Live Data Framework is on-par with or outperforms state-of-the-art solutions for common online streaming tasks (WordCount).
+2. The Pathway Live Data Framework outperforms the other benchmarked engines for iterative graph processing tasks in **batch**.
+3. The Pathway Live Data Framework outperforms the other benchmarked engines for iterative graph processing tasks in **streaming**.
+4. The Pathway Live Data Framework is uniquely able to handle mixed **batch-and-streaming** workloads at scale.
 
 ### WordCount benchmark
-The graph below shows results of the WordCount benchmark. 95% latency is reported in milliseconds (y-axis) per throughput value (x-axis). Out of the four tested solutions, Flink and Pathway are on-par, both clearly outperforming Spark Structured Streaming and Kafka Streams.
+The graph below shows results of the WordCount benchmark. 95% latency is reported in milliseconds (y-axis) per throughput value (x-axis). Out of the four tested solutions, Flink and the Pathway Live Data Framework are on-par, both clearly outperforming Spark Structured Streaming and Kafka Streams.
 
-Pathway clearly outperforms the default Flink setup in terms of sustained throughput, and dominates the Flink minibatching setup in terms of latency for all of the throughput spectrum we could measure. For most throughputs, Pathway also achieves lower latency than the better of the two Flink setups.
+The Pathway Live Data Framework clearly outperforms the default Flink setup in terms of sustained throughput, and dominates the Flink minibatching setup in terms of latency for all of the throughput spectrum we could measure. For most throughputs, the Pathway Live Data Framework also achieves lower latency than the better of the two Flink setups.
 
 ![WordCount Graph](images/bm-wordcount-lineplot.png)
 
@@ -61,7 +61,7 @@ Pathway clearly outperforms the default Flink setup in terms of sustained throug
 The table below shows results of the PageRank benchmark in batch mode. We report the total running time
 in seconds to process the dataset. The standard code logic is an idiomatic (join-based) implementation. Additionally, two incomparable implementations marked with (*) are benchmarked for Spark.
 
-The fastest performance is achieved by the Spark GraphX implementation and the more aggressively-optimized Pathway build. The formulation (and syntax) of the GraphX algorithm is different from the others. Performing an apples-to-apples comparison of performance of equivalent logic in Table APIs, Pathway is the fastest, followed by Flink and Spark.
+The fastest performance is achieved by the Spark GraphX implementation and the more aggressively-optimized Pathway Live Data Framework build. The formulation (and syntax) of the GraphX algorithm is different from the others. Performing an apples-to-apples comparison of performance of equivalent logic in Table APIs, the Pathway Live Data Framework is the fastest, followed by Flink and Spark.
 
 ![PageRank Batch Results](images/bm-pagerank-batch.png)
 
@@ -69,9 +69,9 @@ The fastest performance is achieved by the Spark GraphX implementation and the m
 ### PageRank benchmark (streaming)
 The table below shows results of the PageRank benchmark in streaming mode. We report the total running time in seconds to process the dataset by updating the PageRank results every 1000 edges. 
 
-We evaluate only two systems on the streaming PageRank task: Pathway and Flink. We don’t test Kafka Streams because it was suboptimal on the streaming wordcount task. Moreover, no Spark variant supports such a complicated streaming computation: GraphX doesn’t support streaming, Spark Structured Streaming doesn’t allow chaining multiple groupby’s and reductions, and Spark Continuous Streaming is too limited to support even simple streaming benchmarks.
+We evaluate only two systems on the streaming PageRank task: the Pathway Live Data Framework and Flink. We don’t test Kafka Streams because it was suboptimal on the streaming wordcount task. Moreover, no Spark variant supports such a complicated streaming computation: GraphX doesn’t support streaming, Spark Structured Streaming doesn’t allow chaining multiple groupby’s and reductions, and Spark Continuous Streaming is too limited to support even simple streaming benchmarks.
 
-We see that while both systems are able to run the streaming benchmark, Pathway maintains a large advantage over Flink. It is hard to say whether this advantage is “constant” (with a factor of about 50x) or increases “asymptotically” with dataset size. Indeed, extending the benchmarks to tests on larger datasets than those reported in Table 2 is problematic as Flink’s performance is degraded by memory issues.
+We see that while both systems are able to run the streaming benchmark, the Pathway Live Data Framework maintains a large advantage over Flink. It is hard to say whether this advantage is “constant” (with a factor of about 50x) or increases “asymptotically” with dataset size. Indeed, extending the benchmarks to tests on larger datasets than those reported in Table 2 is problematic as Flink’s performance is degraded by memory issues.
 
 ![PageRank Streaming Results](images/bm-pagerank-streaming.png)
 
@@ -79,7 +79,7 @@ We see that while both systems are able to run the streaming benchmark, Pathway 
 ### PageRank benchmark (backfilling)
 The table below shows results of the PageRank benchmark in a backfilling scenario that mixes batch and streaming. 
 
-Pathway again offers superior performance, completing the first of the datasets considered approximately 20x faster than Flink. The first large batch is processed by Pathway in times comparable to the pure batch scenario. 
+The Pathway Live Data Framework again offers superior performance, completing the first of the datasets considered approximately 20x faster than Flink. The first large batch is processed by the Pathway Live Data Framework in times comparable to the pure batch scenario. 
 
 For backfilling on the complete LiveJournal dataset, Flink either ran out of memory or failed to complete the task on 6 cores within 2 hours, depending on the setup.
 
