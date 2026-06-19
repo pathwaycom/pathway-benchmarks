@@ -1,0 +1,30 @@
+services:
+  questdb:
+    image: questdb/questdb:latest
+    # Pin QuestDB to one CCD / shared-L3 group on the single NUMA node (README).
+    cpuset: ${QUESTDB_CPUSET:-0-5,12-17}
+    environment:
+      - QDB_LINE_DEFAULT_PARTITION_BY=DAY
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 5 bash -c '</dev/tcp/localhost/9000' || exit 1"]
+      interval: 3s
+      timeout: 5s
+      retries: 40
+    ports:
+      - "127.0.0.1:${QUESTDB_HTTP_PORT:-29000}:9000"
+
+  pathway:
+    build:
+      context: ../services/pathway-all
+    # Pin the engine to the other CCD / shared-L3 group, with enough cores for
+    # the largest worker count being measured.
+    cpuset: ${PATHWAY_CPUSET:-6-11,18-23}
+    environment:
+      - DATASET_SIZE
+      - PATHWAY_THREADS
+      - PATHWAY_LICENSE_KEY
+    depends_on:
+      questdb:
+        condition: service_healthy
+    volumes:
+      - ../datasets:/data:ro
