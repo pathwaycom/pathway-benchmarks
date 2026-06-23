@@ -1,0 +1,34 @@
+services:
+  postgres:
+    image: postgres:15
+    # Pin PostgreSQL to one CCD / shared-L3 group on the single NUMA node,
+    # exactly as QuestDB is pinned in its benchmark (README "Machine specs").
+    cpuset: ${POSTGRES_CPUSET:-0-5,12-17}
+    environment:
+      POSTGRES_USER: bench
+      POSTGRES_PASSWORD: bench
+      POSTGRES_DB: bench
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bench -d bench"]
+      interval: 2s
+      timeout: 3s
+      retries: 40
+    ports:
+      - "127.0.0.1:${POSTGRES_HOST_PORT:-55433}:5432"
+
+  pathway:
+    build:
+      context: ../services/pathway-all
+    # Pin the engine to the other CCD / shared-L3 group, with enough cores for
+    # the largest worker count being measured. Mirrors the QuestDB benchmark
+    # exactly.
+    cpuset: ${PATHWAY_CPUSET:-6-11,18-23}
+    environment:
+      - DATASET_SIZE
+      - BATCH_SIZE
+      - PATHWAY_THREADS
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ../datasets:/data:ro
