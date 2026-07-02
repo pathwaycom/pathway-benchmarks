@@ -1,0 +1,41 @@
+services:
+  rabbitmq:
+    # Same image and stream-plugin setup as the Pathway integration-test suite.
+    image: rabbitmq:4-management
+    # Pin RabbitMQ to one CCD / shared-L3 group on the single NUMA node, exactly
+    # as the database is pinned in the QuestDB/PostgreSQL benchmarks.
+    cpuset: ${RABBITMQ_CPUSET:-0-5,12-17}
+    environment:
+      RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: "-rabbitmq_stream advertised_host rabbitmq"
+    entrypoint:
+      - bash
+      - -c
+      - |
+        rabbitmq-plugins enable --offline rabbitmq_stream rabbitmq_stream_management
+        exec docker-entrypoint.sh rabbitmq-server
+    healthcheck:
+      # TCP check on the stream listener (see the integration-test compose for
+      # why a port check is used rather than rabbitmq-diagnostics here).
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/localhost/5552'"]
+      interval: 5s
+      timeout: 5s
+      retries: 40
+      start_period: 30s
+    ports:
+      - "127.0.0.1:${RABBITMQ_MGMT_PORT:-15672}:15672"
+
+  pathway:
+    build:
+      context: ../services/pathway-all
+    # Pin the engine to the other CCD / shared-L3 group, with enough cores for
+    # the largest worker count being measured. Mirrors the other benchmarks.
+    cpuset: ${PATHWAY_CPUSET:-6-11,18-23}
+    environment:
+      - DATASET_SIZE
+      - PATHWAY_THREADS
+      - PATHWAY_LICENSE_KEY
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ../../datasets-shared:/data:ro

@@ -1,0 +1,19 @@
+services:
+  # SQLite is embedded — there is no database server container. The Pathway
+  # engine writes directly to a file on the bind-mounted ./out directory.
+  pathway:
+    build:
+      context: ../services/pathway-all
+    # Pin the engine to one CCD / shared-L3 group, with enough cores for the
+    # largest worker count being measured. Mirrors the other benchmarks (here
+    # there is no separate database service to pin to the other CCD).
+    cpuset: ${PATHWAY_CPUSET:-6-11,18-23}
+    environment:
+      - DATASET_SIZE
+      - BATCH_SIZE
+      - PATHWAY_THREADS
+      - PATHWAY_LICENSE_KEY
+      - SQLITE_PATH=/out/bench.db
+    volumes:
+      - ../../datasets-shared:/data:ro
+      - ../out:/out
