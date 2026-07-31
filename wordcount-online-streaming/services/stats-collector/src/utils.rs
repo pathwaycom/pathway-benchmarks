@@ -15,5 +15,5 @@ pub fn print_to_file(content: &str, file_name: &str) {
         .expect("Unable to open file");
 
     file.write_all(content.as_bytes())
-        .unwrap_or_else(|_| panic!("Failed to write to file {}", &file_name));
+        .unwrap_or_else(|_| panic!("Failed to write to file {}", file_name));
 }

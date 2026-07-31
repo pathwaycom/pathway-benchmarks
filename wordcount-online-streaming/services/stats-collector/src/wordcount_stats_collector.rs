@@ -175,26 +175,26 @@ fn main() {
         }
         pw_version = string_line
             .strip_prefix("pathway, version ")
-            .unwrap_or(&format!("local.{}", &string_line))
+            .unwrap_or(&format!("local.{}", string_line))
             .to_string();
     }
 
-    let instance_prefix = format!("{}-{}", &instance_prefix_no_engine_version, &pw_version);
+    let instance_prefix = format!("{}-{}", instance_prefix_no_engine_version, pw_version);
 
     let metadata_pref = instance_prefix.replace(['/', '-'], ",");
     let metadata_suff = instance_suffix.replace(['-'], ",");
 
-    let instance_name = format!("{}-{}", &instance_prefix, &instance_suffix);
+    let instance_name = format!("{}-{}", instance_prefix, instance_suffix);
 
-    let file_name = format!("results/{}-latency.csv", &instance_name);
-    let timeline_file_name = format!("results/{}-timeline.csv", &instance_name);
+    let file_name = format!("results/{}-latency.csv", instance_name);
+    let timeline_file_name = format!("results/{}-timeline.csv", instance_name);
     let aggregated_timeline_file_name =
-        format!("results/{}-aggregated-timeline.csv", &instance_name);
+        format!("results/{}-aggregated-timeline.csv", instance_name);
     let pref_aggregated_timeline_file_name =
-        format!("results/{}-pref-aggregated-timeline.csv", &instance_name);
+        format!("results/{}-pref-aggregated-timeline.csv", instance_name);
 
     let aggregated_pw_timeline_file_name =
-        format!("results/{}-ptime-aggregated-timeline.csv", &instance_name);
+        format!("results/{}-ptime-aggregated-timeline.csv", instance_name);
 
     let mut timeline_input: Vec<TimeLineEntry<WordCountInputLine>> = {
         let kafka_reader: KafkaReader = KafkaReader {
@@ -285,7 +285,7 @@ fn main() {
     trimmed_latency_profile.sort();
 
     let len = trimmed_latency_profile.len();
-    eprintln!("{}", &instance_name);
+    eprintln!("{}", instance_name);
     for i in 0..11 {
         eprintln!(
             "{}th decile: {} ms",
@@ -302,15 +302,15 @@ fn main() {
         for x in relevant_percentiles {
             str_buffer.push_str(&format!(
                 "{},{},{},{}\n",
-                &metadata_pref,
-                &metadata_suff,
+                metadata_pref,
+                metadata_suff,
                 x,
                 trimmed_latency_profile[((len - 1) * x) / 100].latency
             ));
         }
         str_buffer.push_str(&format!(
             "{},{},-1,{}\n",
-            &metadata_pref, &metadata_suff, lost_cnt
+            metadata_pref, metadata_suff, lost_cnt
         ));
         print_to_file(&str_buffer, &file_name)
     }
@@ -336,7 +336,7 @@ fn main() {
         for (key, x) in tree.iter() {
             str_buffer.push_str(&format!(
                 "{},{},{},{},{},{},{},{},{}\n",
-                &metadata_pref, &metadata_suff, key, x.max, x.p95, x.med, x.p05, x.min, x.count
+                metadata_pref, metadata_suff, key, x.max, x.p95, x.med, x.p05, x.min, x.count
             ));
         }
 
@@ -356,7 +356,7 @@ fn main() {
         for (key, x) in tree.iter() {
             str_buffer.push_str(&format!(
                 "{},{},{},{},{},{},{},{},{}\n",
-                &metadata_pref, &metadata_suff, key, x.max, x.p95, x.med, x.p05, x.min, x.count
+                metadata_pref, metadata_suff, key, x.max, x.p95, x.med, x.p05, x.min, x.count
             ));
         }
 
@@ -378,7 +378,7 @@ fn main() {
         for (key, x) in tree.iter() {
             str_buffer.push_str(&format!(
                 "{},{},{},{},{},{},{},{},{}\n",
-                &metadata_pref, &metadata_suff, key, x.max, x.p95, x.med, x.p05, x.min, x.count
+                metadata_pref, metadata_suff, key, x.max, x.p95, x.med, x.p05, x.min, x.count
             ));
         }
 
