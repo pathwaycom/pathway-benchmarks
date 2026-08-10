@@ -50,7 +50,7 @@ if __name__ == "__main__":
     dataset_path = args.dataset_path
 
     for n_cpus in n_cores_to_test:
-        os.environ["PATHWAY_THREADS"] = str(n_cpus)  # Restict computational cores
+        os.environ["PATHWAY_THREADS"] = str(n_cpus)  # Restrict computational cores
         for n_steps in n_steps_to_test:
             path = "/".join(os.path.abspath(__file__).split("/")[:-1]) + "/main.py"
             command = get_launch_command(
