@@ -1,0 +1,38 @@
+services:
+  pulsar:
+    # Same image as the Pathway integration-test suite.
+    image: apachepulsar/pulsar:4.0.4
+    # Pin Pulsar to one CCD / shared-L3 group on the single NUMA node, exactly
+    # as the database is pinned in the QuestDB/PostgreSQL benchmarks.
+    cpuset: ${PULSAR_CPUSET:-0-5,12-17}
+    command:
+      - bin/pulsar
+      - standalone
+      # The brokerServiceUrl returned by topic lookups must be reachable from
+      # the benchmark container, so the broker advertises its compose hostname.
+      - --advertised-address
+      - pulsar
+    healthcheck:
+      test: ["CMD-SHELL", "bin/pulsar-admin brokers healthcheck"]
+      interval: 10s
+      timeout: 10s
+      retries: 18
+      start_period: 40s
+    ports:
+      - "127.0.0.1:${PULSAR_ADMIN_PORT:-18080}:8080"
+
+  pathway:
+    build:
+      context: ../services/pathway-all
+    # Pin the engine to the other CCD / shared-L3 group, with enough cores for
+    # the largest worker count being measured. Mirrors the other benchmarks.
+    cpuset: ${PATHWAY_CPUSET:-6-11,18-23}
+    environment:
+      - DATASET_SIZE
+      - PATHWAY_THREADS
+      - PATHWAY_LICENSE_KEY
+    depends_on:
+      pulsar:
+        condition: service_healthy
+    volumes:
+      - ../../datasets-shared:/data:ro
