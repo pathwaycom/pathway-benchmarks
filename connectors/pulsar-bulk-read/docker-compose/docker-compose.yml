@@ -32,6 +32,8 @@ services:
       - PATHWAY_THREADS
       - PATHWAY_LICENSE_KEY
       - PULSAR_SUBSCRIPTION
+      - PULSAR_TOPIC
+      - PERSISTENCE
       - BENCH_ENTRYPOINT
     depends_on:
       pulsar:
